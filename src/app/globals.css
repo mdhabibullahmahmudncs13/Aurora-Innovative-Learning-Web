@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+.font-banglaFontBold{
+  font-family: var(--banglaFont);
+}
+.font-NotoBangla{
+  font-family: var(--notoBangla);
+}
+.font-banglaFontSemiBold{
+  font-family: var(--banglaFontTwo);
+}
