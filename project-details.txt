@@ -1,0 +1,868 @@
+﻿Aurora Innovative Learning
+Project Overview
+Aurora Innovative Learning is a modern web-based educational platform designed to facilitate online learning through course management and delivery. The platform provides a comprehensive learning management system (LMS) with role-based access control and course administration capabilities.
+Architecture
+Technology Stack
+* Frontend: Next.js (React framework)
+* Backend: Appwrite Pro (Backend-as-a-Service)
+* Database: Appwrite Database (Unlimited databases)
+* Authentication: Appwrite Auth with Organization roles
+* Storage: Appwrite Storage (150GB storage capacity)
+* Functions: Appwrite Functions (3.5M executions/month)
+* Backup: Daily automated backups (7-day retention)
+System Architecture
+  
+
+
+
+User Roles & Permissions
+1. Regular User (Default)
+Capabilities:
+* Browse available courses
+* Enroll in courses
+* View course content
+* Track learning progress
+* Submit assignments
+* Participate in discussions
+Permissions:
+* Read access to public courses
+* Write access to own profile
+* Read/Write access to own enrollments and progress
+2. Instructor
+Capabilities:
+* All Regular User capabilities
+* Create new courses
+* Modify existing courses (own courses)
+* Delete courses (own courses)
+* Manage course content (videos, documents, quizzes)
+* View student progress and analytics
+* Grade assignments
+* Moderate course discussions
+Permissions:
+* Read/Write access to own courses
+* Read access to enrolled students' progress
+* Write access to grades and feedback
+3. Admin
+Capabilities:
+* All Instructor capabilities
+* Promote Regular Users to Instructor role
+* Manage all users and roles
+* Access platform analytics
+* Manage system settings
+* Override permissions for content moderation
+Permissions:
+* Full system access
+* User role management
+* System configuration
+Appwrite Pro Infrastructure
+Resource Allocation
+* API Bandwidth: 300GB/month - Supports high-traffic course streaming and content delivery
+* Storage Capacity: 150GB - Accommodates extensive course materials, videos, and user uploads
+* Function Executions: 3.5M/month - Powers automated workflows, notifications, and background processing
+* User Capacity: 200K monthly active users - Scalable for large educational institutions
+* Organization Roles: Enhanced role management with team-based permissions
+* Professional Support: Email support for critical issues and platform optimization
+Database Architecture
+With unlimited databases available, Aurora implements a multi-database strategy:
+Primary Database: aurora_main
+* Users, Courses, Lessons, Enrollments
+* High-frequency read/write operations
+* Optimized for performance
+Analytics Database: aurora_analytics
+* User behavior tracking
+* Course performance metrics
+* Learning analytics
+* Separated for query optimization
+Content Database: aurora_content
+* Course materials metadata
+* File references and indexes
+* Content versioning
+Storage Strategy (150GB Capacity)
+Bucket Organization:
+* course-materials: PDFs, documents, presentations, downloadable resources
+* user-uploads: Profile pictures, assignments, user-generated content
+* thumbnails: Course and lesson thumbnails (auto-generated from YouTube)
+* backups: Critical data exports and backups
+* certificates: Course completion certificates and badges
+Storage Optimization:
+* Video Storage: Zero storage usage (YouTube hosted)
+* Thumbnail Caching: YouTube thumbnails cached locally for performance
+* Document Compression: Automated PDF and document optimization
+* Automated Cleanup: Regular cleanup of unused files and expired uploads
+* Significant Storage Savings: ~80% storage reduction by using YouTube for videos
+Users Collection
+{
+  "$id": "string",
+  "email": "string",
+  "name": "string",
+  "role": "regular|instructor|admin",
+  "avatar": "string|null",
+  "bio": "string|null",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+
+
+Courses Collection
+{
+  "$id": "string",
+  "title": "string",
+  "description": "string",
+  "instructor": "string", // User ID
+  "thumbnail": "string|null",
+  "category": "string",
+  "difficulty": "beginner|intermediate|advanced",
+  "duration": "number", // in hours
+  "price": "number",
+  "isPublished": "boolean",
+  "tags": "string[]",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+
+
+Lessons Collection (Secure Video Storage)
+{
+  "$id": "string",
+  "courseId": "string",
+  "title": "string",
+  "description": "string",
+  "content": "string", // Rich text content
+  "youtubeVideoId": "string|null", // NEVER exposed to frontend
+  "encryptedVideoData": "string|null", // Encrypted video metadata
+  "youtubeThumbnail": "string|null", // Cached thumbnail URL
+  "videoDuration": "number|null", // Duration in seconds
+  "attachments": "string[]", // File IDs for downloadable materials
+  "order": "number",
+  "isPreview": "boolean", // If true, accessible without enrollment
+  "accessRestrictions": "object", // Domain and security settings
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+
+
+Video Access Tokens Collection
+{
+  "$id": "string",
+  "userId": "string",
+  "lessonId": "string",
+  "accessToken": "string", // JWT token for video access
+  "expiresAt": "datetime", // Short-lived tokens (5-10 minutes)
+  "ipAddress": "string",
+  "userAgent": "string",
+  "isUsed": "boolean",
+  "revokedAt": "datetime|null"
+}
+
+
+Enrollments Collection
+{
+  "$id": "string",
+  "userId": "string",
+  "courseId": "string",
+  "progress": "number", // 0-100
+  "completedLessons": "string[]", // Lesson IDs
+  "enrolledAt": "datetime",
+### Analytics Collections (`aurora_analytics`)
+```json
+// User Activity Tracking
+{
+  "$id": "string",
+  "userId": "string",
+  "action": "login|course_view|lesson_complete|download",
+  "resourceId": "string|null",
+  "timestamp": "datetime",
+  "metadata": "object"
+}
+
+
+// Course Analytics
+{
+  "$id": "string",
+  "courseId": "string",
+  "totalEnrollments": "number",
+  "completionRate": "number",
+  "averageRating": "number",
+  "totalRevenue": "number",
+  "lastUpdated": "datetime"
+}
+
+
+Content Management Collections (aurora_content)
+// File Metadata
+{
+  "$id": "string",
+  "fileId": "string", // Appwrite File ID
+  "originalName": "string",
+  "mimeType": "string",
+  "size": "number",
+  "bucket": "string",
+  "uploadedBy": "string",
+  "uploadedAt": "datetime",
+  "tags": "string[]"
+}
+
+
+Video Security Architecture
+Multi-Layer Security Approach
+1. Server-Side Video ID Storage: YouTube video IDs never sent to frontend
+2. Secure Token System: Temporary access tokens for video viewing
+3. Domain Restriction: YouTube videos restricted to Aurora domain only
+4. Session Validation: Real-time enrollment and authentication checks
+5. Encrypted Communication: All video requests encrypted and signed
+6. Access Logging: Complete audit trail of video access attempts
+Security Implementation Flow
+User Request → Authentication Check → Enrollment Verification → 
+Token Generation → Secure Video Proxy → YouTube Embed → 
+Progress Tracking → Session Validation
+
+
+Automated Workflows
+1. Course Enrollment Handler (500K executions/month estimated)
+
+   * Processes enrollment requests
+   * Sends welcome emails
+   * Updates user progress tracking
+   2. YouTube Integration Pipeline (400K executions/month estimated)
+
+      * Validate YouTube video URLs and extract video IDs
+      * Fetch video metadata (title, duration, thumbnail)
+      * Generate and cache video thumbnails
+      * Monitor video availability and privacy settings
+      3. Notification System (1M executions/month estimated)
+
+         * Email notifications for course updates
+         * Push notifications for mobile app
+         * Reminder emails for incomplete courses
+         4. Video Progress Tracking (800K executions/month estimated)
+
+            * Track YouTube video watch time via YouTube API
+            * Update user progress in real-time
+            * Calculate completion percentages
+            * Sync watch history across devices
+            5. Notification System (800K executions/month estimated)
+
+               * Email notifications for course updates
+               * Push notifications for mobile app
+               * Reminder emails for incomplete courses
+               * Security alerts for unauthorized access attempts
+               6. Security Monitoring & Analytics (200K executions/month estimated)
+
+                  * Monitor video access patterns for suspicious activity
+                  * Daily analytics processing with security metrics
+                  * Report generation and security auditing
+                  * Automated threat detection and response
+Secure Video Access Functions
+// Secure Video Access Token Generator
+export default async ({ req, res, log, error }) => {
+  const { userId, lessonId } = JSON.parse(req.body);
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+  
+  try {
+    // Verify user authentication
+    const user = await users.get(userId);
+    if (!user) {
+      throw new Error('Unauthorized access');
+    }
+    
+    // Check enrollment status
+    const enrollment = await databases.listDocuments(
+      'aurora_main',
+      'enrollments',
+      [
+        Query.equal('userId', userId),
+        Query.equal('courseId', courseId) // Get courseId from lesson
+      ]
+    );
+    
+    if (!enrollment.documents.length) {
+      throw new Error('User not enrolled in this course');
+    }
+    
+    // Get lesson details (video ID encrypted in database)
+    const lesson = await databases.getDocument('aurora_main', 'lessons', lessonId);
+    
+    // Decrypt video data server-side only
+    const decryptedVideoData = decrypt(lesson.encryptedVideoData, process.env.VIDEO_ENCRYPTION_KEY);
+    const youtubeVideoId = JSON.parse(decryptedVideoData).videoId;
+    
+    // Generate short-lived access token (5 minutes)
+    const accessToken = jwt.sign(
+      {
+        userId,
+        lessonId,
+        youtubeVideoId,
+        ip: clientIP,
+        userAgent: userAgent.substring(0, 100),
+        exp: Math.floor(Date.now() / 1000) + (5 * 60) // 5 minutes
+      },
+      process.env.VIDEO_ACCESS_SECRET
+    );
+    
+    // Store token in database for tracking
+    await databases.createDocument(
+      'aurora_main',
+      'video_access_tokens',
+      ID.unique(),
+      {
+        userId,
+        lessonId,
+        accessToken: hashToken(accessToken), // Store hashed version
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        ipAddress: clientIP,
+        userAgent,
+        isUsed: false
+      }
+    );
+    
+    // Return secure embed URL (not direct YouTube link)
+    return res.json({
+      success: true,
+      embedUrl: `${process.env.AURORA_DOMAIN}/api/video/secure-embed/${accessToken}`,
+      expiresIn: 300 // 5 minutes
+    });
+    
+  } catch (err) {
+    error('Video access denied: ' + err.message);
+    
+    // Log security incident
+    await databases.createDocument(
+      'aurora_analytics',
+      'security_logs',
+      ID.unique(),
+      {
+        userId: userId || 'anonymous',
+        action: 'video_access_denied',
+        reason: err.message,
+        ipAddress: clientIP,
+        userAgent,
+        timestamp: new Date()
+      }
+    );
+    
+    return res.json({ success: false, error: 'Access denied' }, 403);
+  }
+};
+
+
+// Secure Video Embed Proxy
+export default async ({ req, res, log, error }) => {
+  const { token } = req.params;
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+  
+  try {
+    // Verify and decode token
+    const decoded = jwt.verify(token, process.env.VIDEO_ACCESS_SECRET);
+    
+    // Additional security checks
+    if (decoded.ip !== clientIP || !decoded.userAgent.startsWith(userAgent.substring(0, 50))) {
+      throw new Error('Token security validation failed');
+    }
+    
+    // Check if token was already used (prevent replay attacks)
+    const tokenRecord = await databases.listDocuments(
+      'aurora_main',
+      'video_access_tokens',
+      [Query.equal('accessToken', hashToken(token))]
+    );
+    
+    if (!tokenRecord.documents.length || tokenRecord.documents[0].isUsed) {
+      throw new Error('Invalid or expired token');
+    }
+    
+    // Mark token as used
+    await databases.updateDocument(
+      'aurora_main',
+      'video_access_tokens',
+      tokenRecord.documents[0].$id,
+      { isUsed: true }
+    );
+    
+    // Generate secure YouTube embed with domain restrictions
+    const embedHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aurora Learning - Secure Video</title>
+        <style>
+          body { margin: 0; background: #000; }
+          .video-container { position: relative; width: 100%; height: 100vh; }
+          iframe { width: 100%; height: 100%; border: none; }
+          .security-overlay { 
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            pointer-events: none; 
+            z-index: 1000;
+            background: transparent;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="video-container">
+          <iframe
+            src="https://www.youtube.com/embed/${decoded.youtubeVideoId}?
+              enablejsapi=1&
+              origin=${process.env.AURORA_DOMAIN}&
+              modestbranding=1&
+              rel=0&
+              showinfo=0&
+              controls=1&
+              disablekb=1&
+              fs=0&
+              iv_load_policy=3"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin">
+          </iframe>
+          <div class="security-overlay"></div>
+        </div>
+        
+        <script>
+          // Disable right-click and developer tools
+          document.addEventListener('contextmenu', e => e.preventDefault());
+          document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+              e.preventDefault();
+            }
+          });
+          
+          // Video progress tracking with security
+          let player;
+          function onYouTubeIframeAPIReady() {
+            player = new YT.Player('ytplayer', {
+              events: {
+                'onStateChange': onPlayerStateChange
+              }
+            });
+          }
+          
+          function onPlayerStateChange(event) {
+            // Secure progress tracking via Aurora API
+            if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
+              const currentTime = player.getCurrentTime();
+              const duration = player.getDuration();
+              
+              fetch('/api/video/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  lessonId: '${decoded.lessonId}',
+                  watchedSeconds: currentTime,
+                  totalSeconds: duration,
+                  securityToken: '${token}'
+                })
+              });
+            }
+          }
+        </script>
+        <script src="https://www.youtube.com/iframe_api"></script>
+      </body>
+      </html>
+    `;
+    
+    return res.send(embedHtml, 200, {
+      'Content-Type': 'text/html',
+      'X-Frame-Options': `ALLOW-FROM ${process.env.AURORA_DOMAIN}`,
+      'Content-Security-Policy': `frame-ancestors 'self' ${process.env.AURORA_DOMAIN}`,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
+    
+  } catch (err) {
+    error('Secure video access failed: ' + err.message);
+    
+    // Log security incident
+    await databases.createDocument(
+      'aurora_analytics',
+      'security_logs',
+      ID.unique(),
+      {
+        action: 'unauthorized_video_access',
+        token: token.substring(0, 10) + '...', // Log partial token only
+        reason: err.message,
+        ipAddress: clientIP,
+        userAgent,
+        timestamp: new Date()
+      }
+    );
+    
+    return res.send('<h1>Access Denied</h1><p>This video is not available.</p>', 403);
+  }
+};
+
+
+// Utility functions
+function encrypt(text, key) {
+  const crypto = require('crypto');
+  const cipher = crypto.createCipher('aes-256-cbc', key);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
+}
+
+
+function decrypt(text, key) {
+  const crypto = require('crypto');
+  const decipher = crypto.createDecipher('aes-256-cbc', key);
+  let decrypted = decipher.update(text, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+
+function hashToken(token) {
+  const crypto = require('crypto');
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+
+
+
+## API Endpoints
+
+
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
+- `GET /auth/user` - Get current user
+- `PUT /auth/user` - Update user profile
+
+
+### User Management (Admin only)
+- `GET /users` - List all users
+- `PUT /users/:id/role` - Update user role
+- `DELETE /users/:id` - Delete user
+
+
+### Course Management
+- `GET /courses` - List all published courses
+- `GET /courses/:id` - Get course details
+- `POST /courses` - Create course (Instructor/Admin)
+- `PUT /courses/:id` - Update course (Owner/Admin)
+- `DELETE /courses/:id` - Delete course (Owner/Admin)
+- `POST /courses/:id/publish` - Publish course (Owner/Admin)
+
+
+### Video & Content Management
+- `GET /lessons/:id/video` - Get YouTube video embed data
+- `POST /lessons/:id/video` - Add/update YouTube video (Instructor/Admin)
+- `DELETE /lessons/:id/video` - Remove video from lesson (Instructor/Admin)
+- `POST /lessons/:id/video/validate` - Validate YouTube URL and extract metadata
+- `PUT /lessons/:id/video/progress` - Update video watch progress
+- `GET /lessons/:id/video/progress` - Get user's video watch progress
+
+
+### Secure Video Management
+- `POST /api/video/request-access` - Request secure video access token
+- `GET /api/video/secure-embed/:token` - Secure video embed proxy
+- `POST /api/video/progress` - Update video progress with security validation
+- `POST /api/video/validate-access` - Validate user access permissions
+- `DELETE /api/video/revoke-access` - Revoke active video access tokens
+
+
+### YouTube Integration (Server-Side Only)
+- `POST /admin/youtube/validate` - Validate YouTube video (Admin/Instructor only)
+- `POST /admin/youtube/configure-restrictions` - Set domain restrictions
+- `GET /admin/youtube/security-status/:videoId` - Check video security settings
+- `POST /admin/youtube/encrypt-metadata` - Encrypt and store video data
+
+
+## Organization Roles & Team Management
+
+
+### Organization Structure
+Aurora leverages Appwrite Pro's organization roles for enterprise-level management:
+
+
+#### Organization Roles:
+- **Organization Owner**: Full platform control, billing management
+- **Organization Admin**: User management, content oversight, analytics access
+- **Team Lead**: Department/subject-specific course management
+- **Content Creator**: Course development and modification rights
+- **Moderator**: Content review and community management
+- **Viewer**: Read-only access to analytics and reports
+
+
+### Team-Based Permissions
+```json
+// Team Structure Example
+{
+  "organizationId": "aurora_edu_org",
+  "teams": [
+    {
+      "teamId": "computer_science_dept",
+      "name": "Computer Science Department",
+      "members": ["instructor1", "instructor2"],
+      "permissions": ["courses.create", "courses.modify", "students.grade"]
+    },
+    {
+      "teamId": "content_moderators",
+      "name": "Content Moderation Team",
+      "members": ["moderator1", "moderator2"],
+      "permissions": ["content.review", "content.approve", "users.moderate"]
+    }
+  ]
+}
+
+
+Backup & Data Recovery (Pro Feature)
+Automatic Daily Backups
+                  * Frequency: Daily automated backups
+                  * Retention: 7 days of backup history
+                  * Coverage: All databases, user data, and file metadata
+                  * Recovery Time: Point-in-time recovery within backup retention period
+Backup Strategy Implementation
+// Custom backup function for critical data
+export default async ({ req, res, log }) => {
+  try {
+    // Export critical collections
+    const collections = ['users', 'courses', 'enrollments'];
+    const backupData = {};
+    
+    for (const collection of collections) {
+      const documents = await databases.listDocuments('aurora_main', collection);
+      backupData[collection] = documents.documents;
+    }
+    
+    // Store backup in dedicated bucket
+    const backupFile = await storage.createFile(
+      'backups',
+      ID.unique(),
+      JSON.stringify(backupData)
+    );
+    
+    log(`Backup created: ${backupFile.$id}`);
+    return res.json({ success: true, backupId: backupFile.$id });
+  } catch (err) {
+    return res.json({ success: false, error: err.message }, 500);
+  }
+};
+
+
+Features
+Course Management
+                  * Course Creation: Instructors can create comprehensive courses with multiple lessons
+                  * Content Types: Support for video content, text materials, downloadable resources
+                  * Course Organization: Structured lessons with proper sequencing
+                  * Publishing Workflow: Draft and publish states for courses
+Course Learning Experience
+                  * YouTube Video Integration: Seamless unlisted video playback with custom player controls
+                  * Progress Tracking: Accurate video watch time tracking and completion monitoring
+                  * Offline Support: Downloadable course materials (PDFs, documents)
+                  * Multi-device Sync: Watch progress synchronized across all devices
+                  * Video Quality Options: YouTube's adaptive streaming for optimal viewing experience
+                  * Closed Captions: YouTube's built-in accessibility features
+Advanced Security Features
+                  * Video Link Protection: YouTube video IDs encrypted and never exposed to frontend
+                  * Token-Based Access: Short-lived JWT tokens (5-minute expiration) for video access
+                  * Domain Restrictions: YouTube videos configured to only play on Aurora domain
+                  * Session Validation: Real-time authentication and enrollment verification
+                  * Access Auditing: Complete logging of all video access attempts and security incidents
+                  * Anti-Tampering: Multiple layers preventing video URL extraction or unauthorized sharing
+                  * IP/Browser Verification: Tokens tied to specific IP addresses and browser fingerprints
+Video Security Measures
+                  * Encrypted Storage: All YouTube video IDs encrypted in database using AES-256
+                  * Secure Proxy: Videos served through Aurora's secure proxy, never direct YouTube links
+                  * Frame Protection: X-Frame-Options and CSP headers prevent embedding elsewhere
+                  * Developer Tool Blocking: JavaScript protection against inspect element and F12
+                  * Right-Click Disabled: Context menu disabled to prevent "View Source"
+                  * Progress Tracking Security: All video interactions verified server-side with tokens
+Scalability Features
+                  * High Availability: 200K monthly active users with secure video access
+                  * Performance Optimization: 300GB API bandwidth for encrypted video delivery
+                  * Global CDN: Fast content delivery with security maintained
+                  * Auto-scaling: Functions scale automatically with security validation load
+Advanced Features (Appwrite Pro)
+                  * Real-time Analytics: Live course engagement metrics with security monitoring
+                  * Advanced Search: Full-text search across course content
+                  * Automated Workflows: Function-powered course management with security integration
+                  * Team Collaboration: Organization-level course development with access controls
+                  * Enterprise Security: Multi-layer video protection and access management
+                  * Professional Support: Dedicated email support channel
+Installation & Setup
+Prerequisites
+                  * Node.js (v18 or higher)
+                  * npm or yarn
+                  * Appwrite server instance
+Environment Variables
+# Appwrite Pro Configuration
+NEXT_PUBLIC_APPWRITE_URL=your_appwrite_pro_endpoint
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_project_id
+APPWRITE_API_KEY=your_api_key
+
+
+# YouTube Integration & Security
+YOUTUBE_API_KEY=your_youtube_data_api_key
+NEXT_PUBLIC_YOUTUBE_PLAYER_API=true
+VIDEO_ENCRYPTION_KEY=your_aes_256_encryption_key
+VIDEO_ACCESS_SECRET=your_jwt_signing_secret
+AURORA_DOMAIN=https://your-aurora-domain.com
+
+
+# Organization Settings
+NEXT_PUBLIC_ORGANIZATION_ID=your_organization_id
+APPWRITE_ORGANIZATION_KEY=your_org_key
+
+
+# Database Configuration
+APPWRITE_DATABASE_MAIN=aurora_main
+APPWRITE_DATABASE_ANALYTICS=aurora_analytics
+APPWRITE_DATABASE_CONTENT=aurora_content
+
+
+# Storage Buckets (No video bucket needed)
+APPWRITE_BUCKET_MATERIALS=course-materials
+APPWRITE_BUCKET_UPLOADS=user-uploads
+APPWRITE_BUCKET_THUMBNAILS=thumbnails
+APPWRITE_BUCKET_BACKUPS=backups
+APPWRITE_BUCKET_CERTIFICATES=certificates
+
+
+# Function IDs
+FUNCTION_ENROLLMENT_HANDLER=enrollment_handler_id
+FUNCTION_YOUTUBE_INTEGRATION=youtube_integration_id
+FUNCTION_VIDEO_PROGRESS=video_progress_tracker_id
+FUNCTION_NOTIFICATION_SYSTEM=notification_system_id
+
+
+Installation Steps
+                  1. Clone the repository
+                  2. Install dependencies: npm install
+                  3. Configure Appwrite Pro environment variables
+                  4. Set up YouTube Data API key and enable YouTube Player API
+                  5. Set up organization and team structure
+                  6. Create multiple databases (main, analytics, content)
+                  7. Configure storage buckets (optimized for non-video content)
+                  8. Deploy Appwrite Functions including YouTube integration
+                  9. Set up daily backup retention policy
+                  10. Configure organization roles and permissions
+                  11. Test YouTube video validation and embedding
+                  12. Run development server: npm run dev
+YouTube Security Setup
+                  * [ ] YouTube Data API v3 enabled with domain restrictions
+                  * [ ] OAuth 2.0 configured for YouTube API management
+                  * [ ] Video encryption keys generated and secured
+                  * [ ] JWT signing secrets configured for token security
+                  * [ ] Domain whitelist configured in YouTube Developer Console
+                  * [ ] Video access proxy functions deployed and tested
+                  * [ ] Security monitoring and logging system active
+                  * [ ] Anti-tampering protections implemented and verified
+Appwrite Pro Setup Checklist
+                  * [ ] Organization created and configured
+                  * [ ] Team roles and permissions defined
+                  * [ ] Multiple databases created with proper indexes
+                  * [ ] Storage buckets configured (150GB capacity)
+                  * [ ] Functions deployed (utilizing 3.5M executions)
+                  * [ ] Daily backup retention configured (7 days)
+                  * [ ] Email support contact established
+                  * [ ] API bandwidth monitoring set up (300GB limit)
+Security Considerations
+Security Considerations
+Video Protection (Enterprise-Grade)
+                  * Zero Direct Access: YouTube video IDs never exposed to client-side code
+                  * Encrypted Storage: AES-256 encryption for all video metadata in database
+                  * Token-Based Authentication: JWT tokens with 5-minute expiration for video access
+                  * Domain Whitelisting: YouTube videos configured to only play on Aurora domain
+                  * Session Binding: Tokens tied to IP address and browser fingerprint
+                  * Access Revocation: Real-time token revocation and session invalidation
+                  * Audit Trail: Complete logging of all video access attempts and security events
+Multi-Layer Protection
+                  * Server-Side Proxy: All video requests proxied through Aurora servers
+                  * Frame Security: X-Frame-Options and CSP headers prevent external embedding
+                  * Client-Side Protection: JavaScript guards against developer tools and right-click
+                  * Progress Verification: All video interactions validated with security tokens
+                  * Replay Attack Prevention: One-time use tokens prevent replay attacks
+                  * Rate Limiting: Prevents automated video access attempts
+Deployment
+Production Checklist
+                  * [ ] Appwrite Pro environment variables configured
+                  * [ ] Organization and team structure implemented
+                  * [ ] Multiple databases created with proper indexes
+                  * [ ] All storage buckets configured with 150GB optimization
+                  * [ ] Functions deployed and tested (3.5M execution capacity)
+                  * [ ] Daily backup system verified (7-day retention)
+                  * [ ] SSL certificates installed
+                  * [ ] CDN configured for 300GB bandwidth utilization
+                  * [ ] Professional email support contact configured
+                  * [ ] Monitoring for 200K monthly active users set up
+Recommended Hosting
+                  * Frontend: Vercel Pro, Netlify Pro (for high-traffic handling)
+                  * Backend: Appwrite Pro (fully managed)
+                  * CDN: Appwrite Pro CDN + optional CloudFlare for global optimization
+                  * Monitoring: Appwrite Pro analytics + custom Function-based monitoring
+Contributing
+Development Workflow
+                  1. Fork the repository
+                  2. Create feature branch
+                  3. Implement changes with tests
+                  4. Submit pull request
+                  5. Code review and merge
+Code Standards
+                  * ESLint configuration
+                  * Prettier formatting
+                  * TypeScript strict mode
+                  * Component documentation
+Support & Maintenance
+Monitoring (Appwrite Pro Features)
+                  * Application Performance: Built-in Appwrite Pro monitoring
+                  * Function Execution Tracking: Monitor 3.5M monthly executions
+                  * Storage Usage: Track 150GB storage utilization
+                  * API Bandwidth: Monitor 300GB monthly bandwidth usage
+                  * User Activity: Track up to 200K monthly active users
+                  * Automated Alerts: Email notifications for threshold breaches
+                  * Daily Backup Verification: Ensure 7-day backup retention
+                  * Professional Support: Email support for critical issues
+Resource Optimization
+Storage Management (150GB Limit)
+// Function to monitor and optimize storage usage
+export default async ({ req, res, log }) => {
+  const buckets = ['course-videos', 'course-materials', 'user-uploads'];
+  let totalUsage = 0;
+  
+  for (const bucketId of buckets) {
+    const files = await storage.listFiles(bucketId);
+    const bucketSize = files.files.reduce((sum, file) => sum + file.sizeOriginal, 0);
+    totalUsage += bucketSize;
+    
+    log(`Bucket ${bucketId}: ${(bucketSize / 1024 / 1024 / 1024).toFixed(2)} GB`);
+  }
+  
+  const usagePercentage = (totalUsage / (150 * 1024 * 1024 * 1024)) * 100;
+  
+  if (usagePercentage > 80) {
+    // Trigger cleanup or alert
+    await functions.createExecution('storage-cleanup');
+  }
+  
+  return res.json({ 
+    totalUsage: `${(totalUsage / 1024 / 1024 / 1024).toFixed(2)} GB`,
+    usagePercentage: `${usagePercentage.toFixed(2)}%`
+  });
+};
+
+
+Function Execution Optimization (3.5M/month)
+                  * Implement function caching for repeated operations
+                  * Use batch processing for bulk operations
+                  * Queue non-critical functions for off-peak execution
+                  * Monitor execution patterns for optimization opportunities
+Backup Strategy
+                  * Regular database backups
+                  * File storage replication
+                  * Configuration backup
+                  * Disaster recovery plan
+Roadmap
+Upcoming Features
+                  * Advanced quiz and assessment system
+                  * Real-time video conferencing
+                  * Mobile application
+                  * Certification system
+                  * Payment integration
+                  * Advanced analytics dashboard
+________________
+
+
