@@ -6,15 +6,23 @@ import { useEffect, useState } from 'react';
 import { databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
 import toast from 'react-hot-toast';
+import ContentManager from '@/components/admin/ContentManager';
+import ContentUpload from '@/components/admin/ContentUpload';
+import LessonManager from '@/components/admin/LessonManager';
 
-export default function AdminDashboard() {
+
+function AdminDashboard() {
   const { user, userProfile, isAuthenticated, isAdmin, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedCourseForContent, setSelectedCourseForContent] = useState(null);
+  const [showContentManager, setShowContentManager] = useState(false);
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [showLessonManager, setShowLessonManager] = useState(false);
+  const [selectedCourseForLessons, setSelectedCourseForLessons] = useState(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
@@ -23,6 +31,13 @@ export default function AdminDashboard() {
     instructorUsers: 0,
     regularUsers: 0
   });
+  
+
+
+  const openLessonManager = (course) => {
+    setSelectedCourseForLessons(course);
+    setShowLessonManager(true);
+  };
   
   // Course creation states
   const [showCreateCourse, setShowCreateCourse] = useState(false);
@@ -451,7 +466,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6">
-              {['overview', 'users', 'courses', 'analytics'].map((tab) => (
+              {['overview', 'users', 'courses', 'lessons', 'content', 'analytics'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -969,6 +984,100 @@ export default function AdminDashboard() {
               </div>
             )}
             
+            {/* Lessons Management Tab */}
+            {activeTab === 'lessons' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-gray-900">Lesson Management</h2>
+                </div>
+                
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Select Course to Manage Lessons</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {courses.map((course) => (
+                      <div key={course.$id} className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                        <h4 className="font-medium text-gray-900 mb-2">{course.title}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{course.description?.substring(0, 100)}...</p>
+                        <button
+                          onClick={() => openLessonManager(course)}
+                          className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          Manage Lessons
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Content Management Tab */}
+            {activeTab === 'content' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900">Content Management</h3>
+                  <div className="flex gap-3">
+                    <select
+                      value={selectedCourseForContent || ''}
+                      onChange={(e) => setSelectedCourseForContent(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    >
+                      <option value="">Select a course</option>
+                      {courses.map((course) => (
+                        <option key={course.$id} value={course.$id}>
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setShowContentManager(!showContentManager)}
+                      disabled={!selectedCourseForContent}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {showContentManager ? 'Hide Manager' : 'Manage Content'}
+                    </button>
+                    <button
+                      onClick={() => openLessonManager({ $id: selectedCourseForContent, title: courses.find(c => c.$id === selectedCourseForContent)?.title })}
+                      disabled={!selectedCourseForContent}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Manage Lessons
+                    </button>
+                  </div>
+                </div>
+
+                {!selectedCourseForContent ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <p className="text-yellow-800">Please select a course to manage its content.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Content Upload Section */}
+                    <ContentUpload 
+                      courseId={selectedCourseForContent}
+                      onUploadComplete={() => {
+                        // Refresh content manager if it's open
+                        if (showContentManager) {
+                          // The ContentManager component will automatically refresh
+                        }
+                        toast.success('Content uploaded successfully!');
+                      }}
+                    />
+                    
+                    {/* Content Manager Section */}
+                    {showContentManager && (
+                      <ContentManager courseId={selectedCourseForContent} />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
               <div className="space-y-6">
@@ -990,6 +1099,19 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </div>
+ 
+      {/* Lesson Manager Modal */}
+      {showLessonManager && selectedCourseForLessons && (
+        <LessonManager 
+          courseId={selectedCourseForLessons.$id}
+          courseTitle={selectedCourseForLessons.title}
+          onClose={() => setShowLessonManager(false)}
+        />
+      )}
+    
+      </div>
+  
   );
-}
+};
+
+export default AdminDashboard;

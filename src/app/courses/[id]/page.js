@@ -1,20 +1,24 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from "next/link";
+import Link from 'next/link';
 import Image from 'next/image';
 import ReactPlayer from 'react-player';
-import { useCourse } from '@/contexts/CourseContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCourse } from '@/contexts/CourseContext';
 import { useVideo } from '@/contexts/VideoContext';
+import CourseContent from '@/components/CourseContent';
 import toast from 'react-hot-toast';
 
+
 const CoursePage = ({ params }) => {
+  const unwrappedParams = React.use(params);
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { fetchCourse, enrollInCourse, isEnrolled, updateLessonProgress } = useCourse();
   const { getVideoAccess, updateVideoProgress } = useVideo();
+  const { userProfile } = useAuth();
   
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -22,15 +26,17 @@ const CoursePage = ({ params }) => {
   const [videoUrl, setVideoUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
-  // Removed activeTab state as we now show content in linear order
   const [progress, setProgress] = useState(0);
   const [userEnrolled, setUserEnrolled] = useState(false);
   
+  // Check if user can manage lessons (instructor or admin)
+  const canManageLessons = userProfile && (userProfile.role === 'instructor' || userProfile.role === 'admin');
+  
   useEffect(() => {
-    if (params?.id) {
-      loadCourse(params.id);
+    if (unwrappedParams?.id) {
+      loadCourse(unwrappedParams.id);
     }
-  }, [params?.id, user]);
+  }, [unwrappedParams?.id, user]);
   
   const loadCourse = async (courseId) => {
     try {
@@ -44,15 +50,21 @@ const CoursePage = ({ params }) => {
       
       if (isAuthenticated) {
         const enrolled = isEnrolled(courseId);
+        console.log('Checking enrollment for course:', courseId, 'Enrolled:', enrolled, 'User:', user?.$id);
         setUserEnrolled(enrolled);
         
         if (enrolled && result.course.lessons?.length > 0) {
+          console.log('User is enrolled, loading first lesson');
           // Set first incomplete lesson or first lesson
           const firstIncompleteLesson = result.course.lessons.find(lesson => !lesson.completed);
           const lessonToPlay = firstIncompleteLesson || result.course.lessons[0];
           setCurrentLesson(lessonToPlay);
           await loadVideo(lessonToPlay);
+        } else if (!enrolled) {
+          console.log('User is not enrolled in this course');
         }
+      } else {
+        console.log('User is not authenticated');
       }
       
       setLoading(false);
@@ -67,11 +79,31 @@ const CoursePage = ({ params }) => {
     if (!lesson || !userEnrolled) return;
     
     try {
-      const videoAccess = await getVideoAccess(lesson.$id);
-      setVideoUrl(videoAccess.url);
+      console.log('Loading video for lesson:', lesson.title, 'URL:', lesson.videoUrl);
+      
+      // For now, use the lesson's videoUrl directly since server functions are not deployed
+      if (lesson.videoUrl) {
+        // Validate YouTube URL before setting it
+        const youtubeRegex = /^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+        if (youtubeRegex.test(lesson.videoUrl)) {
+          console.log('Setting valid YouTube URL:', lesson.videoUrl);
+          setVideoUrl(lesson.videoUrl);
+        } else {
+          console.warn('Invalid YouTube URL for lesson:', lesson.title, 'URL:', lesson.videoUrl);
+          setVideoUrl(''); // Clear invalid URL
+          toast.error('Invalid video URL for this lesson');
+        }
+      } else {
+        console.log('No direct videoUrl, requesting video access for lesson:', lesson.$id);
+        const videoAccess = await getVideoAccess(lesson.$id);
+        const accessUrl = videoAccess.embedUrl || videoAccess.url;
+        console.log('Video access result:', accessUrl);
+        setVideoUrl(accessUrl);
+      }
     } catch (error) {
       console.error('Error loading video:', error);
       toast.error('Failed to load video');
+      setVideoUrl(''); // Clear video URL on error
     }
   };
   
@@ -101,11 +133,15 @@ const CoursePage = ({ params }) => {
   };
   
   const handleLessonSelect = async (lesson) => {
+    console.log('Lesson selected:', lesson.title, 'User enrolled:', userEnrolled, 'Is authenticated:', isAuthenticated);
+    
     if (!userEnrolled) {
+      console.log('User not enrolled, showing enrollment message');
       toast.error('Please enroll in the course to access lessons');
       return;
     }
     
+    console.log('Setting current lesson and loading video');
     setCurrentLesson(lesson);
     await loadVideo(lesson);
   };
@@ -177,6 +213,14 @@ const CoursePage = ({ params }) => {
                       height="100%"
                       controls
                       onProgress={handleVideoProgress}
+                      onError={(error) => {
+                        console.error('ReactPlayer error for URL:', videoUrl, 'Error:', error);
+                        toast.error('Failed to load video player');
+                        setVideoUrl(''); // Clear problematic URL
+                      }}
+                      onReady={() => {
+                        console.log('ReactPlayer ready with URL:', videoUrl);
+                      }}
                       config={{
                         youtube: {
                           playerVars: { showinfo: 1 }
@@ -190,7 +234,7 @@ const CoursePage = ({ params }) => {
                       <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p>Select a lesson to start learning</p>
+                      <p>{currentLesson ? 'Video not available for this lesson' : 'Select a lesson to start learning'}</p>
                     </div>
                   </div>
                 )}
@@ -198,8 +242,12 @@ const CoursePage = ({ params }) => {
                 {/* Lesson Info */}
                 {currentLesson && (
                   <div className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{currentLesson.title}</h2>
-                    <p className="text-gray-600 mb-4">{currentLesson.description}</p>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{currentLesson.title}</h2>
+                        <p className="text-gray-600 mb-4">{currentLesson.description}</p>
+                      </div>
+                    </div>
                     
                     {/* Lesson Progress */}
                     <div className="flex items-center justify-between text-sm text-gray-500">
@@ -256,6 +304,11 @@ const CoursePage = ({ params }) => {
                 </div>
               </div>
             </div>
+            
+            {/* Course Materials for Enrolled Users */}
+            <div className="lg:col-span-4 mt-8">
+              <CourseContent courseId={course.$id} userEnrolled={userEnrolled} />
+            </div>
           </div>
         </div>
       ) : (
@@ -264,7 +317,7 @@ const CoursePage = ({ params }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Course Content */}
             <div className="lg:col-span-2">
-              {/* Course Thumbnail - First */}
+              {/* Course Thumbnail */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div className="aspect-video bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center relative">
                   {course.thumbnail ? (
@@ -274,22 +327,19 @@ const CoursePage = ({ params }) => {
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextElementSibling.style.display = 'flex';
-                      }}
                     />
-                  ) : null}
-                  <div className={`text-center text-white ${course.thumbnail ? 'hidden' : 'flex'} flex-col items-center justify-center h-full`}>
-                    <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
-                      <span className="text-3xl font-bold">{course.title?.charAt(0) || 'C'}</span>
+                  ) : (
+                    <div className="text-center text-white flex flex-col items-center justify-center h-full">
+                      <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                        <span className="text-3xl font-bold">{course.title?.charAt(0) || 'C'}</span>
+                      </div>
+                      <p className="text-lg font-semibold">{course.title}</p>
                     </div>
-                    <p className="text-lg font-semibold">{course.title}</p>
-                  </div>
+                  )}
                 </div>
               </div>
               
-              {/* Course Details - Second */}
+              {/* Course Details */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                   {course.title}
@@ -319,46 +369,17 @@ const CoursePage = ({ params }) => {
                     {course.enrollmentCount || 0} students
                   </span>
                 </div>
-                
-                {/* What you'll learn */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">What you'll learn</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {course.learningOutcomes?.map((outcome, index) => (
-                      <div key={index} className="flex items-start">
-                        <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-gray-700">{outcome}</span>
-                      </div>
-                    )) || (
-                      <p className="text-gray-500 col-span-2">Learning outcomes will be available soon.</p>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Requirements */}
-                {course.requirements && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Requirements</h3>
-                    <ul className="list-disc list-inside space-y-2 text-gray-700">
-                      {course.requirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
               
-              {/* Course Lessons - Third */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              {/* Course Lessons */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-6">
                     Course Content ({lessons.length} lessons)
                   </h3>
                   <div className="space-y-3">
                     {lessons.map((lesson, index) => (
-                      <div key={lesson.$id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-indigo-200 hover:bg-indigo-50 transition-colors">
+                      <div key={lesson.$id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-semibold mr-4">
                             {index + 1}
@@ -390,72 +411,47 @@ const CoursePage = ({ params }) => {
                   )}
                 </div>
               </div>
+              
+              {/* Course Materials */}
+              <CourseContent courseId={course.$id} userEnrolled={false} />
             </div>
             
             {/* Enrollment Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-                {/* Price */}
                 <div className="text-center mb-6">
-                  {course.price === 0 ? (
-                    <div className="text-3xl font-bold text-green-600">Free</div>
-                  ) : (
-                    <div>
-                      <div className="text-3xl font-bold text-gray-900">${course.price}</div>
-                      {course.originalPrice && course.originalPrice > course.price && (
-                        <div className="text-sm text-gray-500 line-through">${course.originalPrice}</div>
-                      )}
-                    </div>
-                  )}
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {course.price === 0 ? 'Free' : `$${course.price}`}
+                  </div>
+                  <p className="text-sm text-gray-500">Full lifetime access</p>
                 </div>
                 
-                {/* Enrollment Button */}
                 <button
                   onClick={handleEnrollment}
                   disabled={enrolling}
                   className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
                 >
-                  {enrolling ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Enrolling...
-                    </div>
-                  ) : (
-                    course.price === 0 ? 'Enroll for Free' : 'Enroll Now'
-                  )}
+                  {enrolling ? 'Enrolling...' : 'Enroll Now'}
                 </button>
                 
-                {/* Course Features */}
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="space-y-3 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    {course.duration ? `${Math.round(course.duration)} hours` : 'Self-paced'}
+                    Full lifetime access
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    {lessons.length} lessons
+                    Access on mobile and desktop
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    Mobile & Desktop Access
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Certificate of Completion
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Lifetime Access
+                    Certificate of completion
                   </div>
                 </div>
               </div>

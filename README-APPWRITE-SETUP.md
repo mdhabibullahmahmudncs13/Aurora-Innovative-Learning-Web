@@ -83,6 +83,10 @@ NEXT_PUBLIC_APPWRITE_COLLECTION_USERS_ID=users
 NEXT_PUBLIC_APPWRITE_COLLECTION_COURSES_ID=courses
 NEXT_PUBLIC_APPWRITE_COLLECTION_LESSONS_ID=lessons
 NEXT_PUBLIC_APPWRITE_COLLECTION_ENROLLMENTS_ID=enrollments
+NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_TOKENS_ID=video_access_tokens
+NEXT_PUBLIC_APPWRITE_COLLECTION_USER_ACTIVITY_ID=user_activity
+NEXT_PUBLIC_APPWRITE_COLLECTION_COURSE_ANALYTICS_ID=course_analytics
+NEXT_PUBLIC_APPWRITE_COLLECTION_FILE_METADATA_ID=file_metadata
 
 # Storage Bucket IDs
 NEXT_PUBLIC_APPWRITE_BUCKET_COURSE_MATERIALS_ID=course-materials
@@ -236,9 +240,223 @@ Collection Name: Enrollments
 | isCompleted | Boolean | - | ❌ | false | ❌ |
 | completedAt | DateTime | - | ❌ | null | ❌ |
 
+### Collection 4: File Metadata
+
+**Collection Setup:**
+```
+Collection ID: file_metadata
+Collection Name: File Metadata
+```
+
+**Attributes:**
+| Attribute | Type | Size | Required | Default | Array |
+|-----------|------|------|----------|---------|-------|
+| fileName | String | 255 | ✅ | - | ❌ |
+| originalName | String | 255 | ✅ | - | ❌ |
+| fileSize | Integer | - | ✅ | - | ❌ |
+| mimeType | String | 100 | ✅ | - | ❌ |
+| bucketId | String | 100 | ✅ | - | ❌ |
+| courseId | String | 255 | ❌ | null | ❌ |
+| uploadedBy | String | 255 | ✅ | - | ❌ |
+| uploadedAt | DateTime | - | ✅ | - | ❌ |
+| fileType | String | 50 | ✅ | - | ❌ |
+| isActive | Boolean | - | ❌ | true | ❌ |
+
+**Purpose:** Track metadata for all uploaded files including course materials, thumbnails, and certificates.
+
+## 📁 Storage Buckets Setup
+
+### Step 6: Create Storage Buckets
+
+Appwrite Storage allows you to manage files for your application. Create the following buckets for the Aurora Learning Platform:
+
+#### Navigate to Storage:
+1. In Appwrite Console, go to **"Storage"**
+2. Click **"Create Bucket"** for each bucket below
+
+### Bucket 1: Course Materials
+
+**Bucket Configuration:**
+```
+Bucket ID: course-materials
+Bucket Name: Course Materials
+File Size Limit: 100MB
+Allowed File Extensions: pdf,doc,docx,ppt,pptx,txt,zip,rar
+Encryption: Enabled
+Antivirus: Enabled
+```
+
+**Permissions:**
+```
+Read: users
+Create: role:instructor, role:admin
+Update: role:instructor, role:admin
+Delete: role:instructor, role:admin
+```
+
+**Purpose:** Store course-related documents, PDFs, presentations, and downloadable materials.
+
+### Bucket 2: User Uploads
+
+**Bucket Configuration:**
+```
+Bucket ID: user-uploads
+Bucket Name: User Uploads
+File Size Limit: 50MB
+Allowed File Extensions: jpg,jpeg,png,gif,pdf,doc,docx
+Encryption: Enabled
+Antivirus: Enabled
+```
+
+**Permissions:**
+```
+Read: user:[USER_ID]
+Create: users
+Update: user:[USER_ID]
+Delete: user:[USER_ID]
+```
+
+**Purpose:** Store user-generated content like profile pictures, assignments, and personal documents.
+
+### Bucket 3: Thumbnails
+
+**Bucket Configuration:**
+```
+Bucket ID: thumbnails
+Bucket Name: Course Thumbnails
+File Size Limit: 10MB
+Allowed File Extensions: jpg,jpeg,png,webp
+Encryption: Enabled
+Antivirus: Enabled
+```
+
+**Permissions:**
+```
+Read: users
+Create: role:instructor, role:admin
+Update: role:instructor, role:admin
+Delete: role:instructor, role:admin
+```
+
+**Purpose:** Store course thumbnail images and other visual assets.
+
+### Bucket 4: Certificates
+
+**Bucket Configuration:**
+```
+Bucket ID: certificates
+Bucket Name: Course Certificates
+File Size Limit: 20MB
+Allowed File Extensions: pdf,jpg,jpeg,png
+Encryption: Enabled
+Antivirus: Enabled
+```
+
+**Permissions:**
+```
+Read: user:[USER_ID]
+Create: role:admin
+Update: role:admin
+Delete: role:admin
+```
+
+**Purpose:** Store generated course completion certificates for users.
+
+### Bucket Creation Steps:
+
+For each bucket:
+
+1. **Create Bucket:**
+   - Click **"Create Bucket"**
+   - Enter the Bucket ID exactly as specified
+   - Set the Bucket Name
+   - Click **"Create"**
+
+2. **Configure Settings:**
+   - Go to **Settings** tab
+   - Set **Maximum File Size** as specified
+   - Enable **Encryption** (recommended)
+   - Enable **Antivirus** (recommended)
+   - Set **Allowed File Extensions** in the format: `jpg,png,pdf` (comma-separated, no spaces)
+
+3. **Set Permissions:**
+   - Go to **Permissions** tab
+   - Configure permissions as specified for each bucket
+   - Click **"Update"** to save
+
+### Storage Security Best Practices:
+
+#### File Validation:
+- Always validate file types on the client side
+- Implement server-side validation for additional security
+- Set appropriate file size limits
+
+#### Access Control:
+- Use specific permissions for each bucket type
+- Regularly review and update permissions
+- Monitor file access patterns
+
+#### Content Management:
+- Implement file cleanup routines for temporary files
+- Use compression for large files when possible
+- Consider CDN integration for better performance
+
+### Storage Usage Examples:
+
+#### Upload Course Material:
+```javascript
+import { storage } from './lib/appwrite';
+
+const uploadCourseMaterial = async (file, courseId) => {
+  try {
+    const response = await storage.createFile(
+      'course-materials', // bucket ID
+      'unique()', // file ID
+      file
+    );
+    return response;
+  } catch (error) {
+    console.error('Upload failed:', error);
+  }
+};
+```
+
+#### Download File:
+```javascript
+const downloadFile = async (bucketId, fileId) => {
+  try {
+    const result = storage.getFileDownload(bucketId, fileId);
+    return result;
+  } catch (error) {
+    console.error('Download failed:', error);
+  }
+};
+```
+
+#### Get File Preview:
+```javascript
+const getFilePreview = (bucketId, fileId) => {
+  return storage.getFilePreview(
+    bucketId,
+    fileId,
+    300, // width
+    300, // height
+    'center', // gravity
+    100, // quality
+    0, // border width
+    '000000', // border color
+    0, // border radius
+    1, // opacity
+    0, // rotation
+    '000000', // background
+    'jpg' // output format
+  );
+};
+```
+
 ## 🔐 Permissions & Security
 
-### Step 6: Configure Collection Permissions
+### Step 7: Configure Collection Permissions
 
 For each collection, navigate to **Settings** → **Permissions** and configure:
 
@@ -282,7 +500,7 @@ Delete: user:[USER_ID]
 
 ## 🔑 Authentication Setup
 
-### Step 7: Enable Authentication Methods
+### Step 8: Enable Authentication Methods
 
 1. Navigate to **Auth** in the sidebar
 2. Go to **Settings** tab
@@ -307,7 +525,7 @@ Delete: user:[USER_ID]
 
 ## ⚡ Performance Optimization
 
-### Step 8: Create Database Indexes
+### Step 9: Create Database Indexes
 
 Create indexes for better query performance:
 
@@ -356,7 +574,7 @@ Create indexes for better query performance:
 
 ## 🧪 Testing & Verification
 
-### Step 9: Test Your Setup
+### Step 10: Test Your Setup
 
 1. **Restart Development Server:**
    ```bash
@@ -391,11 +609,13 @@ Create indexes for better query performance:
 - [ ] ✅ Courses collection created with all attributes
 - [ ] ✅ Lessons collection created with all attributes
 - [ ] ✅ Enrollments collection created with all attributes
-- [ ] ✅ Permissions configured for all collections
+- [ ] ✅ Storage buckets created (course-materials, user-uploads, thumbnails, certificates)
+- [ ] ✅ Permissions configured for all collections and buckets
 - [ ] ✅ Email/Password authentication enabled
 - [ ] ✅ Database indexes created
 - [ ] ✅ User registration works
 - [ ] ✅ User login works
+- [ ] ✅ File upload functionality works
 - [ ] ✅ No console errors
 
 ## 🔍 Troubleshooting
@@ -486,7 +706,7 @@ Create indexes for better query performance:
 
 ## 🚀 Production Deployment
 
-### Step 10: Prepare for Production
+### Step 11: Prepare for Production
 
 #### Update Platform Settings:
 1. Go to **Settings** → **Platforms**
@@ -540,6 +760,7 @@ You've successfully set up Appwrite as the backend for your Aurora Learning Plat
 - ✅ **Course Management** - Create, read, update courses
 - ✅ **Lesson Management** - Organize course content
 - ✅ **Enrollment Tracking** - Monitor student progress
+- ✅ **File Storage** - Upload and manage course materials, thumbnails, and certificates
 - ✅ **Performance Optimization** - Database indexes for speed
 - ✅ **Security** - Proper permissions and access control
 

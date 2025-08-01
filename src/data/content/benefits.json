@@ -1,0 +1,32 @@
+{
+  "benefits": [
+    {
+      "id": 1,
+      "title": "ইন্ডাস্ট্রি এক্সপার্টদের কন্টেন্ট",
+      "description": "আমাদের প্রতিটা কন্টেন্ট ইন্ডাস্ট্রির টপ এক্সপার্টদের সরাসরি সাপোর্ট, গাইডেন্স ও ফিডব্যাক দিয়ে বানানো।",
+      "icon": "https://bohubrihi.com/_next/static/media/benefit-icon-1.84ccd2d2.svg",
+      "color": "blue"
+    },
+    {
+      "id": 2,
+      "title": "প্র্যাকটিক্যাল প্রজেক্ট",
+      "description": "প্রতিটি কোর্সে রয়েছে হ্যান্ডস-অন প্রজেক্ট যা আপনার পোর্টফোলিও তৈরি করতে সাহায্য করবে।",
+      "icon": "https://bohubrihi.com/_next/static/media/benefit-icon-2.84ccd2d2.svg",
+      "color": "green"
+    },
+    {
+      "id": 3,
+      "title": "লাইফটাইম এক্সেস",
+      "description": "একবার কোর্স কিনলে আজীবন এক্সেস পাবেন। যেকোনো সময় যেকোনো জায়গা থেকে শিখতে পারবেন।",
+      "icon": "https://bohubrihi.com/_next/static/media/benefit-icon-3.84ccd2d2.svg",
+      "color": "purple"
+    },
+    {
+      "id": 4,
+      "title": "সার্টিফিকেট",
+      "description": "কোর্স সম্পূর্ণ করার পর পাবেন ভেরিফাইড সার্টিফিকেট যা আপনার ক্যারিয়ারে কাজে আসবে।",
+      "icon": "https://bohubrihi.com/_next/static/media/benefit-icon-4.84ccd2d2.svg",
+      "color": "orange"
+    }
+  ]
+}

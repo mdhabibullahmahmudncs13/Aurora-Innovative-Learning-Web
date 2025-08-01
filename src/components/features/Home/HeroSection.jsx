@@ -2,20 +2,19 @@ import Link from "next/link";
 import React from "react";
 
 function HeroSection(props) {
-
   return (
     <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 place-items-center font-banglaFontBold p-3 lg:px-20 mt-8 lg:py-16">
       <div className="flex flex-col items-center lg:items-start gap-4 lg:gap-7">
         <h1 className="text-4xl lg:text-6xl leading-[48px] lg:leading-[72px]">
-          নিজের মত শিখুন,<br></br>আত্মবিশ্বাস গড়ুন!
+          নিজের মত শিখুন,<br></br>আত্মবিশ্বাস গড়ুন!
         </h1>
         <p className="text-center text-sm leading-7 lg:leading-[32px] lg:text-start lg:text-lg font-NotoBangla">
-          চাকরি কিংবা ফ্রিল্যান্সিংয়ের জন্য নিজেকে প্রস্তুত করতে বহুব্রীহির
-          ক্যারিয়ার ট্র্যাক কোর্সগুলোই যথেষ্ট।
+          চাকরি কিংবা ফ্রিল্যান্সিংয়ের জন্য নিজেকে প্রস্তুত করতে বহুব্রীহির
+          ক্যারিয়ার ট্র্যাক কোর্সগুলোই যথেষ্ট।
         </p>
         <Link
           href={"/courses"}
-          className="bg-[#ce268c] rounded-sm py-2 px-3 lg:text-lg lg:px-5 text-white text-center font-banglaFontSemiBold"
+          className="bg-pink-600 hover:bg-pink-700 rounded-lg py-3 px-6 lg:text-lg lg:px-8 text-white text-center font-banglaFontSemiBold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
         >
           কোর্সগুলো দেখুন
         </Link>
