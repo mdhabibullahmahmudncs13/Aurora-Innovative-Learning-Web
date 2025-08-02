@@ -8,13 +8,41 @@ import Footer from "@/components/shared/Footer/Footer";
 
 export default function Home() {
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+      {/* Modern Hero Section */}
       <HeroSection/>
-      <CareerTrack/>
+      
+      {/* Career Track with Enhanced Spacing */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 -skew-y-1 transform origin-top-left"></div>
+        <div className="relative">
+          <CareerTrack/>
+        </div>
+      </div>
+      
+      {/* Benefits Section */}
       <BenifitSection/>
-      <PracticalProjectSection/>
+      
+      {/* Practical Projects */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-teal-50/30 skew-y-1 transform origin-top-left"></div>
+        <div className="relative">
+          <PracticalProjectSection/>
+        </div>
+      </div>
+      
+      {/* Contact Section */}
       <ContactSection/>
-      <CareerSuccess/>
+      
+      {/* Career Success Stories */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-50/40 to-orange-50/40 -skew-y-1 transform origin-top-left"></div>
+        <div className="relative">
+          <CareerSuccess/>
+        </div>
+      </div>
+      
+      {/* Footer */}
       <Footer/>
     </div>
   );

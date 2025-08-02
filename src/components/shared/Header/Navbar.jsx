@@ -94,6 +94,15 @@ export default function Navbar() {
                         🛡️ Admin Dashboard
                       </Link>
                     )}
+                    {(userProfile?.role === 'instructor' || userProfile?.role === 'admin') && (
+                      <Link
+                        href="/instructor"
+                        className="block px-4 py-2 text-sm text-green-600 hover:bg-gray-100 font-semibold"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        📚 Instructor Dashboard
+                      </Link>
+                    )}
                     <Link
                       href="/debug"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -166,6 +175,9 @@ export default function Navbar() {
               <Link href={"/dashboard"} className="px-8 py-3 bg-gray-100 rounded-md text-gray-700 w-full text-center" onClick={() => setMenuOpen(false)}>Dashboard</Link>
               {userProfile?.role === 'admin' && (
                 <Link href={"/admin"} className="px-8 py-3 bg-red-100 rounded-md text-red-600 w-full text-center font-semibold" onClick={() => setMenuOpen(false)}>🛡️ Admin Dashboard</Link>
+              )}
+              {(userProfile?.role === 'instructor' || userProfile?.role === 'admin') && (
+                <Link href={"/instructor"} className="px-8 py-3 bg-green-100 rounded-md text-green-600 w-full text-center font-semibold" onClick={() => setMenuOpen(false)}>📚 Instructor Dashboard</Link>
               )}
               <Link href={"/debug"} className="px-8 py-3 bg-gray-100 rounded-md text-gray-700 w-full text-center" onClick={() => setMenuOpen(false)}>Debug Database</Link>
               <Link href={"/profile"} className="px-8 py-3 bg-gray-100 rounded-md text-gray-700 w-full text-center" onClick={() => setMenuOpen(false)}>Profile</Link>
