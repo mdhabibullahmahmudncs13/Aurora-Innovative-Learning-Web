@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
-  const { user, isAuthenticated, updateProfile, changePassword, loading } = useAuth();
+  const { user, userProfile, isAuthenticated, updateProfile, changePassword, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('profile'); // profile, security, preferences
   const [profileLoading, setProfileLoading] = useState(false);
@@ -47,19 +47,19 @@ const ProfilePage = () => {
       return;
     }
     
-    if (user) {
+    if (user && userProfile) {
       setProfileData({
-        name: user.name || '',
+        name: userProfile.name || user.name || '',
         email: user.email || '',
-        phone: user.phone || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || '',
-        linkedin: user.linkedin || '',
-        github: user.github || ''
+        phone: userProfile.phone || '',
+        bio: userProfile.bio || '',
+        location: userProfile.location || '',
+        website: userProfile.website || '',
+        linkedin: userProfile.linkedin || '',
+        github: userProfile.github || ''
       });
     }
-  }, [user, isAuthenticated, loading, router]);
+  }, [user, userProfile, isAuthenticated, loading, router]);
   
   const handleProfileChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
@@ -235,7 +235,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                     <input
                       type="text"
-                      value={profileData.name}
+                      value={profileData.name || ''}
                       onChange={(e) => handleProfileChange('name', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
@@ -246,7 +246,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
                     <input
                       type="email"
-                      value={profileData.email}
+                      value={profileData.email || ''}
                       onChange={(e) => handleProfileChange('email', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
@@ -257,7 +257,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                     <input
                       type="tel"
-                      value={profileData.phone}
+                      value={profileData.phone || ''}
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -267,7 +267,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
                     <input
                       type="text"
-                      value={profileData.location}
+                      value={profileData.location || ''}
                       onChange={(e) => handleProfileChange('location', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="City, Country"
@@ -277,7 +277,7 @@ const ProfilePage = () => {
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
                     <textarea
-                      value={profileData.bio}
+                      value={profileData.bio || ''}
                       onChange={(e) => handleProfileChange('bio', e.target.value)}
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -289,7 +289,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
                     <input
                       type="url"
-                      value={profileData.website}
+                      value={profileData.website || ''}
                       onChange={(e) => handleProfileChange('website', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="https://yourwebsite.com"
@@ -300,7 +300,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
                     <input
                       type="url"
-                      value={profileData.linkedin}
+                      value={profileData.linkedin || ''}
                       onChange={(e) => handleProfileChange('linkedin', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="https://linkedin.com/in/username"
@@ -311,7 +311,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">GitHub</label>
                     <input
                       type="url"
-                      value={profileData.github}
+                      value={profileData.github || ''}
                       onChange={(e) => handleProfileChange('github', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="https://github.com/username"
@@ -349,7 +349,7 @@ const ProfilePage = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Current Password *</label>
                       <input
                         type="password"
-                        value={passwordData.currentPassword}
+                        value={passwordData.currentPassword || ''}
                         onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
@@ -360,7 +360,7 @@ const ProfilePage = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">New Password *</label>
                       <input
                         type="password"
-                        value={passwordData.newPassword}
+                        value={passwordData.newPassword || ''}
                         onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
@@ -372,7 +372,7 @@ const ProfilePage = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password *</label>
                       <input
                         type="password"
-                        value={passwordData.confirmPassword}
+                        value={passwordData.confirmPassword || ''}
                         onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required

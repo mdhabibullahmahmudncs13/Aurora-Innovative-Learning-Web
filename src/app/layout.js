@@ -5,6 +5,7 @@ import Navbar from "@/components/shared/Header/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CourseProvider } from "@/contexts/CourseContext";
 import { VideoProvider } from "@/contexts/VideoContext";
+import { PaymentProvider } from "@/contexts/PaymentContext";
 import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
@@ -55,30 +56,32 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <CourseProvider>
             <VideoProvider>
-              <Navbar/>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    theme: {
-                      primary: '#4aed88',
-                    },
-                  },
-                  error: {
+              <PaymentProvider>
+                <Navbar/>
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
                     duration: 4000,
-                    theme: {
-                      primary: '#ff6b6b',
+                    style: {
+                      background: '#363636',
+                      color: '#fff',
                     },
-                  },
-                }}
-              />
+                    success: {
+                      duration: 3000,
+                      theme: {
+                        primary: '#4aed88',
+                      },
+                    },
+                    error: {
+                      duration: 4000,
+                      theme: {
+                        primary: '#ff6b6b',
+                      },
+                    },
+                  }}
+                />
+              </PaymentProvider>
             </VideoProvider>
           </CourseProvider>
         </AuthProvider>

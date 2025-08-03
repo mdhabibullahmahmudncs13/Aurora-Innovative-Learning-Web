@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCourse } from '@/contexts/CourseContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePayment } from '@/contexts/PaymentContext';
+import PaymentSubmission from '@/components/student/PaymentSubmission';
 import toast from 'react-hot-toast';
 
-const CheckoutContent = () => {
+const CheckoutPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated } = useAuth();
@@ -17,7 +19,7 @@ const CheckoutContent = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card'); // card, paypal, bank
+  const [paymentMethod, setPaymentMethod] = useState('card'); // card, paypal, bank, mobile
   const [billingInfo, setBillingInfo] = useState({
     firstName: '',
     lastName: '',
@@ -104,6 +106,11 @@ const CheckoutContent = () => {
   };
   
   const handleEnrollment = async () => {
+    if (paymentMethod === 'mobile') {
+      // Mobile payment (bKash/Nagad) will be handled by PaymentSubmission component
+      return;
+    }
+    
     if (!validateForm()) return;
     
     setProcessing(true);
@@ -128,6 +135,12 @@ const CheckoutContent = () => {
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handlePaymentSubmitted = (paymentRequest) => {
+    // Called when mobile payment is submitted
+    toast.success('Payment request submitted! You will be enrolled once verified.');
+    router.push(`/courses/${course.$id}`);
   };
   
   const simulatePayment = async () => {
@@ -269,6 +282,24 @@ const CheckoutContent = () => {
                       PayPal
                     </label>
                   </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      id="mobile"
+                      name="payment-method"
+                      type="radio"
+                      value="mobile"
+                      checked={paymentMethod === 'mobile'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    />
+                    <label htmlFor="mobile" className="ml-3 block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <span className="text-pink-600 font-semibold">bKash</span>
+                      <span className="text-gray-400">/</span>
+                      <span className="text-orange-600 font-semibold">Nagad</span>
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full ml-2">Popular in Bangladesh</span>
+                    </label>
+                  </div>
                 </div>
                 
                 {/* Card Information */}
@@ -323,6 +354,15 @@ const CheckoutContent = () => {
                         />
                       </div>
                     </div>
+                  </div>
+                )}
+                
+                {paymentMethod === 'mobile' && (
+                  <div className="mt-6">
+                    <PaymentSubmission 
+                      course={course} 
+                      onPaymentSubmitted={handlePaymentSubmitted}
+                    />
                   </div>
                 )}
                 
@@ -402,14 +442,15 @@ const CheckoutContent = () => {
                 </div>
               </div>
               
-              {/* Enrollment Button */}
-              <button
-                onClick={handleEnrollment}
-                disabled={processing}
-                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
-              >
-                {processing ? (
-                  <div className="flex items-center justify-center">
+              {/* Enrollment Button - Hidden for mobile payments */}
+              {paymentMethod !== 'mobile' && (
+                <button
+                  onClick={handleEnrollment}
+                  disabled={processing}
+                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
+                >
+                  {processing ? (
+                    <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     {course.price === 0 ? 'Enrolling...' : 'Processing Payment...'}
                   </div>
@@ -417,6 +458,7 @@ const CheckoutContent = () => {
                   course.price === 0 ? 'Enroll for Free' : 'Complete Purchase'
                 )}
               </button>
+              )}
               
               {/* Security Notice */}
               <div className="text-xs text-gray-500 text-center">
@@ -433,14 +475,6 @@ const CheckoutContent = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const CheckoutPage = () => {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-lg">Loading checkout...</div></div>}>
-      <CheckoutContent />
-    </Suspense>
   );
 };
 

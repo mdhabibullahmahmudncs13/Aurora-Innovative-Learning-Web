@@ -20,11 +20,10 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
   const [lessonForm, setLessonForm] = useState({
     title: '',
     description: '',
-    content: '',
     videoUrl: '',
     duration: '',
     order: 1,
-    isPublished: false
+    isPreview: false
   });
   
   // Upload form state
@@ -205,11 +204,10 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
     setLessonForm({
       title: '',
       description: '',
-      content: '',
       videoUrl: '',
       duration: '',
       order: lessons.length + 1,
-      isPublished: false
+      isPreview: false
     });
     setEditingLesson(null);
     setShowLessonForm(false);
@@ -229,12 +227,11 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
   const editLesson = (lesson) => {
     setLessonForm({
       title: lesson.title,
-      description: lesson.description,
-      content: lesson.content,
+      description: lesson.description || '',
       videoUrl: lesson.videoUrl || '',
       duration: lesson.duration || '',
       order: lesson.order,
-      isPublished: lesson.isPublished
+      isPreview: lesson.isPreview || false
     });
     setEditingLesson(lesson);
     setShowLessonForm(true);
@@ -450,16 +447,7 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Content</label>
-                  <textarea
-                    value={lessonForm.content}
-                    onChange={(e) => setLessonForm({...lessonForm, content: e.target.value})}
-                    rows={6}
-                    className="w-full px-3 py-2 bg-white/60 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Lesson content, instructions, or notes..."
-                  />
-                </div>
+
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -468,7 +456,7 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
                       type="url"
                       value={lessonForm.videoUrl}
                       onChange={(e) => setLessonForm({...lessonForm, videoUrl: e.target.value})}
-                      placeholder="https://youtube.com/watch?v=..."
+                      placeholder="YouTube: https://youtube.com/watch?v=... or Google Drive: https://drive.google.com/file/d/.../view"
                       className="w-full px-3 py-2 bg-white/60 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -488,13 +476,13 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    id="isPublished"
-                    checked={lessonForm.isPublished}
-                    onChange={(e) => setLessonForm({...lessonForm, isPublished: e.target.checked})}
+                    id="isPreview"
+                    checked={lessonForm.isPreview}
+                    onChange={(e) => setLessonForm({...lessonForm, isPreview: e.target.checked})}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                   />
-                  <label htmlFor="isPublished" className="ml-2 text-sm text-slate-700">
-                    Publish lesson immediately
+                  <label htmlFor="isPreview" className="ml-2 text-sm text-slate-700">
+                    Allow preview for non-enrolled users
                   </label>
                 </div>
                 
@@ -539,10 +527,10 @@ function CourseContentManager({ courses, selectedCourse, onCourseSelect }) {
                             {lesson.order}
                           </span>
                           <h4 className="text-lg font-semibold text-slate-900">{lesson.title}</h4>
-                          {lesson.isPublished ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full">Published</span>
+                          {lesson.isPreview ? (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">Preview</span>
                           ) : (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-600 text-xs rounded-full">Draft</span>
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Enrolled Only</span>
                           )}
                         </div>
                         <p className="text-slate-600 mb-3">{lesson.description}</p>

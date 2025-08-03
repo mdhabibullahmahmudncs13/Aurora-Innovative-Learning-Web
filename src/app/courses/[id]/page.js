@@ -84,15 +84,17 @@ const CoursePage = ({ params }) => {
       
       // For now, use the lesson's videoUrl directly since server functions are not deployed
       if (lesson.videoUrl) {
-        // Validate YouTube URL before setting it
+        // Validate YouTube or Google Drive URL before setting it
         const youtubeRegex = /^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
-        if (youtubeRegex.test(lesson.videoUrl)) {
-          console.log('Setting valid YouTube URL:', lesson.videoUrl);
+        const googleDriveRegex = /^(https?\:\/\/)?(drive\.google\.com\/file\/d\/[a-zA-Z0-9_-]+)/;
+        
+        if (youtubeRegex.test(lesson.videoUrl) || googleDriveRegex.test(lesson.videoUrl)) {
+          console.log('Setting valid video URL:', lesson.videoUrl);
           setVideoUrl(lesson.videoUrl);
         } else {
-          console.warn('Invalid YouTube URL for lesson:', lesson.title, 'URL:', lesson.videoUrl);
+          console.warn('Invalid video URL for lesson:', lesson.title, 'URL:', lesson.videoUrl);
           setVideoUrl(''); // Clear invalid URL
-          toast.error('Invalid video URL for this lesson');
+          toast.error('Invalid video URL for this lesson. Please use YouTube or Google Drive links.');
         }
       } else {
         console.log('No direct videoUrl, requesting video access for lesson:', lesson.$id);

@@ -200,38 +200,60 @@ export const VideoProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, []);
 
-    // YouTube video validation for instructors (Local fallback until Appwrite functions are deployed)
+    // Video validation for instructors (supports YouTube and Google Drive)
     const validateYouTubeVideo = async (videoUrl) => {
         try {
             setLoading(true);
 
-            // Extract YouTube video ID from URL
-            const videoId = extractYouTubeVideoId(videoUrl);
-            if (!videoId) {
-                toast.error('Invalid YouTube URL format');
-                return { success: false, error: 'Invalid YouTube URL format' };
-            }
-
-            // Basic validation - check if URL is accessible
-            const isValid = await validateYouTubeUrlFormat(videoUrl);
-            if (!isValid) {
-                toast.error('Invalid YouTube video URL');
-                return { success: false, error: 'Invalid YouTube video URL' };
-            }
-
-            // Return success with basic video data
-            return {
-                success: true,
-                videoData: {
-                    videoId: videoId,
-                    title: `YouTube Video ${videoId}`,
-                    duration: 'Unknown',
-                    thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-                    url: videoUrl
+            // Check if it's a YouTube URL
+            const youtubeVideoId = extractYouTubeVideoId(videoUrl);
+            if (youtubeVideoId) {
+                const isValidYoutube = await validateYouTubeUrlFormat(videoUrl);
+                if (!isValidYoutube) {
+                    toast.error('Invalid YouTube video URL');
+                    return { success: false, error: 'Invalid YouTube video URL' };
                 }
-            };
+
+                return {
+                    success: true,
+                    videoData: {
+                        videoId: youtubeVideoId,
+                        title: `YouTube Video ${youtubeVideoId}`,
+                        duration: 'Unknown',
+                        thumbnail: `https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`,
+                        url: videoUrl,
+                        type: 'youtube'
+                    }
+                };
+            }
+
+            // Check if it's a Google Drive URL
+            const googleDriveId = extractGoogleDriveVideoId(videoUrl);
+            if (googleDriveId) {
+                const isValidGoogleDrive = await validateGoogleDriveUrlFormat(videoUrl);
+                if (!isValidGoogleDrive) {
+                    toast.error('Invalid Google Drive video URL');
+                    return { success: false, error: 'Invalid Google Drive video URL' };
+                }
+
+                return {
+                    success: true,
+                    videoData: {
+                        videoId: googleDriveId,
+                        title: `Google Drive Video ${googleDriveId}`,
+                        duration: 'Unknown',
+                        thumbnail: null,
+                        url: videoUrl,
+                        type: 'googledrive'
+                    }
+                };
+            }
+
+            // If neither YouTube nor Google Drive
+            toast.error('Please provide a valid YouTube or Google Drive video URL');
+            return { success: false, error: 'Unsupported video URL format. Please use YouTube or Google Drive links.' };
         } catch (error) {
-            console.error('Error validating YouTube video:', error);
+            console.error('Error validating video:', error);
             toast.error('Failed to validate video');
             return { success: false, error: error.message };
         } finally {
@@ -250,6 +272,19 @@ export const VideoProvider = ({ children }) => {
     const validateYouTubeUrlFormat = async (url) => {
         const youtubeRegex = /^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
         return youtubeRegex.test(url);
+    };
+
+    // Helper function to extract Google Drive video ID
+    const extractGoogleDriveVideoId = (url) => {
+        const regExp = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+        const match = url.match(regExp);
+        return match ? match[1] : null;
+    };
+
+    // Helper function to validate Google Drive URL format
+    const validateGoogleDriveUrlFormat = async (url) => {
+        const googleDriveRegex = /^(https?\:\/\/)?(drive\.google\.com\/file\/d\/[a-zA-Z0-9_-]+)/;
+        return googleDriveRegex.test(url);
     };
 
     // Configure video domain restrictions (Admin only) - Placeholder until Appwrite functions are deployed

@@ -11,6 +11,8 @@ import AdminStats from '@/components/admin/AdminStats';
 import UserManagement from '@/components/admin/UserManagement';
 import CourseManagement from '@/components/admin/CourseManagement';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import PaymentMethodManager from '@/components/admin/PaymentMethodManager';
+import PaymentVerificationDashboard from '@/components/admin/PaymentVerificationDashboard';
 
 function AdminDashboard() {
   const { user, userProfile, isAuthenticated, isAdmin, loading } = useAuth();
@@ -114,6 +116,8 @@ function AdminDashboard() {
     { id: 'courses', name: 'Course Management', icon: '📚' },
     { id: 'content', name: 'Content & Lessons', icon: '🎬' },
     { id: 'users', name: 'User Management', icon: '👥' },
+    { id: 'payments', name: 'Payment Methods', icon: '💳' },
+    { id: 'verification', name: 'Payment Verification', icon: '✅' },
     { id: 'analytics', name: 'Analytics', icon: '📈' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
@@ -240,6 +244,16 @@ function AdminDashboard() {
               users={users}
               onRefresh={fetchAdminData}
             />
+          )}
+
+          {/* Payment Methods Tab */}
+          {activeTab === 'payments' && (
+            <PaymentMethodManager />
+          )}
+
+          {/* Payment Verification Tab */}
+          {activeTab === 'verification' && (
+            <PaymentVerificationDashboard />
           )}
 
           {/* Analytics Tab */}

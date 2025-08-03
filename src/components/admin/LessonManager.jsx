@@ -253,14 +253,14 @@ const LessonManager = ({ courseId, courseTitle, onClose }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      YouTube Video URL *
+                      Video URL *
                     </label>
                     <input
                       type="url"
                       value={formData.youtubeUrl}
                       onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      placeholder="YouTube: https://youtube.com/watch?v=... or Google Drive: https://drive.google.com/file/d/.../view"
                       required
                     />
                   </div>

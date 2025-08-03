@@ -73,21 +73,34 @@ const CustomVideoPlayer = ({
     };
   }, [onProgress, onError, onReady]);
 
-  // Extract video ID from YouTube URL and convert to embed format
+  // Extract video ID from URL and convert to embed format
   const getVideoSource = (url) => {
     if (!url) return null;
     
     // Handle YouTube URLs
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(youtubeRegex);
+    const youtubeMatch = url.match(youtubeRegex);
     
-    if (match) {
+    if (youtubeMatch) {
       // For YouTube, we'll use an iframe with restricted parameters
       const origin = typeof window !== 'undefined' ? window.location.origin : 'https://localhost:3001';
       return {
         type: 'youtube',
-        id: match[1],
-        embedUrl: `https://www.youtube.com/embed/${match[1]}?autoplay=0&controls=1&disablekb=1&fs=0&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0&origin=${origin}`
+        id: youtubeMatch[1],
+        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=0&controls=1&disablekb=1&fs=0&modestbranding=1&rel=0&iv_load_policy=3&cc_load_policy=0&origin=${origin}`
+      };
+    }
+    
+    // Handle Google Drive URLs
+    const googleDriveRegex = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+    const googleDriveMatch = url.match(googleDriveRegex);
+    
+    if (googleDriveMatch) {
+      // For Google Drive, convert to embed format
+      return {
+        type: 'googledrive',
+        id: googleDriveMatch[1],
+        embedUrl: `https://drive.google.com/file/d/${googleDriveMatch[1]}/preview`
       };
     }
     
@@ -180,6 +193,60 @@ const CustomVideoPlayer = ({
           onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         />
         {/* Block bottom control bar sharing options */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-12 bg-transparent z-50"
+          style={{ pointerEvents: 'auto' }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        />
+        {/* Full overlay to catch any missed interactions */}
+        <div 
+          className="absolute inset-0 bg-transparent z-40"
+          style={{ pointerEvents: 'none' }}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        />
+      </div>
+    );
+  }
+
+  // For Google Drive videos, use iframe
+  if (videoSource.type === 'googledrive') {
+    return (
+      <div className="relative w-full h-full bg-black" style={{ width, height }}>
+        <iframe
+          src={videoSource.embedUrl}
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          allow="autoplay"
+          className="w-full h-full"
+          onLoad={() => {
+            setLoading(false);
+            if (onReady) onReady();
+          }}
+        />
+        {/* Enhanced security overlays to disable pop-out button and sharing options */}
+        {/* Block top-right area where pop-out button appears */}
+        <div 
+          className="absolute top-0 right-0 w-24 h-16 bg-transparent z-50"
+          style={{ pointerEvents: 'auto' }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        />
+        {/* Block title area and any top controls */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-20 bg-transparent z-50"
+          style={{ pointerEvents: 'auto' }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        />
+        {/* Block bottom control bar */}
         <div 
           className="absolute bottom-0 left-0 right-0 h-12 bg-transparent z-50"
           style={{ pointerEvents: 'auto' }}
