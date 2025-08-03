@@ -1,0 +1,156 @@
+{
+  "hero": {
+    "title": "Explore Our Courses",
+    "subtitle": "Choose from our comprehensive catalog of industry-relevant courses designed to advance your career",
+    "backgroundImage": "/images/courses-hero.jpg"
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Web Development",
+      "description": "Master modern web technologies and frameworks",
+      "icon": "web",
+      "courseCount": 25,
+      "color": "#3B82F6"
+    },
+    {
+      "id": 2,
+      "name": "Data Science",
+      "description": "Learn data analysis, machine learning, and AI",
+      "icon": "data",
+      "courseCount": 18,
+      "color": "#10B981"
+    },
+    {
+      "id": 3,
+      "name": "Mobile Development",
+      "description": "Build native and cross-platform mobile apps",
+      "icon": "mobile",
+      "courseCount": 15,
+      "color": "#8B5CF6"
+    },
+    {
+      "id": 4,
+      "name": "Cloud Computing",
+      "description": "Master cloud platforms and DevOps practices",
+      "icon": "cloud",
+      "courseCount": 20,
+      "color": "#F59E0B"
+    },
+    {
+      "id": 5,
+      "name": "Cybersecurity",
+      "description": "Protect systems and data from digital threats",
+      "icon": "security",
+      "courseCount": 12,
+      "color": "#EF4444"
+    },
+    {
+      "id": 6,
+      "name": "UI/UX Design",
+      "description": "Create beautiful and user-friendly interfaces",
+      "icon": "design",
+      "courseCount": 16,
+      "color": "#EC4899"
+    }
+  ],
+  "featuredCourses": [
+    {
+      "id": 1,
+      "title": "Full Stack Web Development Bootcamp",
+      "description": "Complete web development course covering React, Node.js, and databases",
+      "instructor": "John Smith",
+      "duration": "12 weeks",
+      "level": "Beginner to Advanced",
+      "price": 299,
+      "originalPrice": 399,
+      "rating": 4.9,
+      "studentsEnrolled": 2847,
+      "image": "/images/courses/fullstack.jpg",
+      "category": "Web Development",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "Data Science with Python",
+      "description": "Learn data analysis, visualization, and machine learning with Python",
+      "instructor": "Dr. Sarah Chen",
+      "duration": "10 weeks",
+      "level": "Intermediate",
+      "price": 249,
+      "originalPrice": 349,
+      "rating": 4.8,
+      "studentsEnrolled": 1923,
+      "image": "/images/courses/datascience.jpg",
+      "category": "Data Science",
+      "featured": true
+    },
+    {
+      "id": 3,
+      "title": "React Native Mobile Development",
+      "description": "Build cross-platform mobile apps with React Native",
+      "instructor": "Mike Johnson",
+      "duration": "8 weeks",
+      "level": "Intermediate",
+      "price": 199,
+      "originalPrice": 299,
+      "rating": 4.7,
+      "studentsEnrolled": 1456,
+      "image": "/images/courses/reactnative.jpg",
+      "category": "Mobile Development",
+      "featured": true
+    }
+  ],
+  "learningPaths": [
+    {
+      "id": 1,
+      "title": "Frontend Developer Path",
+      "description": "Complete learning path to become a frontend developer",
+      "courses": ["HTML/CSS Fundamentals", "JavaScript Mastery", "React Development", "Advanced Frontend"],
+      "duration": "6 months",
+      "level": "Beginner to Advanced"
+    },
+    {
+      "id": 2,
+      "title": "Data Analyst Path",
+      "description": "Comprehensive path for aspiring data analysts",
+      "courses": ["Statistics Fundamentals", "Python for Data", "Data Visualization", "Advanced Analytics"],
+      "duration": "5 months",
+      "level": "Beginner to Intermediate"
+    },
+    {
+      "id": 3,
+      "title": "Cloud Engineer Path",
+      "description": "Master cloud technologies and DevOps practices",
+      "courses": ["Cloud Fundamentals", "AWS Essentials", "Docker & Kubernetes", "DevOps Practices"],
+      "duration": "7 months",
+      "level": "Intermediate to Advanced"
+    }
+  ],
+  "benefits": [
+    {
+      "id": 1,
+      "title": "Lifetime Access",
+      "description": "Access course materials forever, including future updates",
+      "icon": "lifetime"
+    },
+    {
+      "id": 2,
+      "title": "Certificate of Completion",
+      "description": "Earn industry-recognized certificates upon course completion",
+      "icon": "certificate"
+    },
+    {
+      "id": 3,
+      "title": "Project-Based Learning",
+      "description": "Build real-world projects to showcase in your portfolio",
+      "icon": "project"
+    },
+    {
+      "id": 4,
+      "title": "Community Support",
+      "description": "Join our active community of learners and instructors",
+      "icon": "community"
+    }
+  ]
+}

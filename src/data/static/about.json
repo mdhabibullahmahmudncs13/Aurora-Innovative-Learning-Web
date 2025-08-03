@@ -1,0 +1,97 @@
+{
+  "hero": {
+    "title": "About Aurora Innovative Learning",
+    "subtitle": "Empowering learners worldwide with innovative education solutions",
+    "backgroundImage": "/images/about-hero.jpg"
+  },
+  "mission": {
+    "title": "Our Mission",
+    "content": "To democratize quality education by providing accessible, innovative, and practical learning experiences that empower individuals to achieve their career goals and transform their lives."
+  },
+  "vision": {
+    "title": "Our Vision",
+    "content": "To become the world's leading platform for skill-based learning, bridging the gap between education and industry needs while fostering a global community of lifelong learners."
+  },
+  "values": [
+    {
+      "id": 1,
+      "title": "Innovation",
+      "description": "We continuously evolve our teaching methods and technology to provide cutting-edge learning experiences.",
+      "icon": "innovation"
+    },
+    {
+      "id": 2,
+      "title": "Accessibility",
+      "description": "Quality education should be available to everyone, regardless of their background or location.",
+      "icon": "accessibility"
+    },
+    {
+      "id": 3,
+      "title": "Excellence",
+      "description": "We maintain the highest standards in course content, instruction, and student support.",
+      "icon": "excellence"
+    },
+    {
+      "id": 4,
+      "title": "Community",
+      "description": "We foster a supportive learning environment where students and instructors collaborate and grow together.",
+      "icon": "community"
+    }
+  ],
+  "team": [
+    {
+      "id": 1,
+      "name": "Dr. Alexandra Thompson",
+      "role": "Founder & CEO",
+      "bio": "Former MIT professor with 15+ years in educational technology. Passionate about making quality education accessible to all.",
+      "image": "/images/team/alexandra.jpg",
+      "linkedin": "https://linkedin.com/in/alexandra-thompson"
+    },
+    {
+      "id": 2,
+      "name": "James Wilson",
+      "role": "CTO",
+      "bio": "Tech veteran with experience at Google and Microsoft. Leads our platform development and innovation initiatives.",
+      "image": "/images/team/james.jpg",
+      "linkedin": "https://linkedin.com/in/james-wilson"
+    },
+    {
+      "id": 3,
+      "name": "Maria Garcia",
+      "role": "Head of Education",
+      "bio": "Former curriculum designer at top universities. Ensures our courses meet the highest educational standards.",
+      "image": "/images/team/maria.jpg",
+      "linkedin": "https://linkedin.com/in/maria-garcia"
+    },
+    {
+      "id": 4,
+      "name": "David Kim",
+      "role": "Head of Student Success",
+      "bio": "Dedicated to student outcomes with a background in educational psychology and career counseling.",
+      "image": "/images/team/david.jpg",
+      "linkedin": "https://linkedin.com/in/david-kim"
+    }
+  ],
+  "achievements": [
+    {
+      "id": 1,
+      "title": "50,000+ Students Graduated",
+      "description": "Successfully helped thousands of students achieve their career goals"
+    },
+    {
+      "id": 2,
+      "title": "95% Job Placement Rate",
+      "description": "Our graduates consistently find employment in their chosen fields"
+    },
+    {
+      "id": 3,
+      "title": "Industry Partnerships",
+      "description": "Collaborations with leading companies to ensure relevant curriculum"
+    },
+    {
+      "id": 4,
+      "title": "Global Recognition",
+      "description": "Award-winning platform recognized by education and technology leaders"
+    }
+  ]
+}
