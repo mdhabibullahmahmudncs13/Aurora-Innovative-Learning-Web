@@ -1,0 +1,66 @@
+{
+  "hero": {
+    "title": "Transform Your Future with Aurora Innovative Learning",
+    "subtitle": "Discover cutting-edge courses designed to elevate your skills and career prospects",
+    "ctaText": "Start Learning Today",
+    "backgroundImage": "/images/hero-bg.jpg"
+  },
+  "features": [
+    {
+      "id": 1,
+      "title": "Expert Instructors",
+      "description": "Learn from industry professionals with years of real-world experience",
+      "icon": "instructor"
+    },
+    {
+      "id": 2,
+      "title": "Interactive Learning",
+      "description": "Engage with hands-on projects and interactive content",
+      "icon": "interactive"
+    },
+    {
+      "id": 3,
+      "title": "Flexible Schedule",
+      "description": "Learn at your own pace with 24/7 access to course materials",
+      "icon": "flexible"
+    },
+    {
+      "id": 4,
+      "title": "Career Support",
+      "description": "Get guidance and support to advance your career",
+      "icon": "career"
+    }
+  ],
+  "stats": {
+    "students": "10,000+",
+    "courses": "150+",
+    "instructors": "50+",
+    "completionRate": "95%"
+  },
+  "testimonials": [
+    {
+      "id": 1,
+      "name": "Sarah Johnson",
+      "role": "Software Developer",
+      "content": "Aurora's courses helped me transition into tech. The instructors are amazing!",
+      "rating": 5,
+      "avatar": "/images/testimonials/sarah.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Michael Chen",
+      "role": "Data Scientist",
+      "content": "The practical approach and real-world projects made all the difference.",
+      "rating": 5,
+      "avatar": "/images/testimonials/michael.jpg"
+    },
+    {
+      "id": 3,
+      "name": "Emily Rodriguez",
+      "role": "UX Designer",
+      "content": "Flexible learning schedule allowed me to study while working full-time.",
+      "rating": 5,
+      "avatar": "/images/testimonials/emily.jpg"
+    }
+  ]
+}

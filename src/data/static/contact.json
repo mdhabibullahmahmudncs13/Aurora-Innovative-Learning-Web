@@ -1,0 +1,144 @@
+{
+  "hero": {
+    "title": "Get in Touch",
+    "subtitle": "We're here to help you on your learning journey. Reach out to us anytime!",
+    "backgroundImage": "/images/contact-hero.jpg"
+  },
+  "contactInfo": {
+    "email": "hello@auroralearning.com",
+    "phone": "+1 (555) 123-4567",
+    "address": "123 Innovation Drive, Tech City, TC 12345",
+    "businessHours": {
+      "weekdays": "Monday - Friday: 9:00 AM - 6:00 PM",
+      "weekend": "Saturday: 10:00 AM - 4:00 PM",
+      "closed": "Sunday: Closed"
+    }
+  },
+  "offices": [
+    {
+      "id": 1,
+      "name": "Headquarters",
+      "address": "123 Innovation Drive, Tech City, TC 12345",
+      "phone": "+1 (555) 123-4567",
+      "email": "headquarters@auroralearning.com",
+      "coordinates": {
+        "lat": 37.7749,
+        "lng": -122.4194
+      }
+    },
+    {
+      "id": 2,
+      "name": "European Office",
+      "address": "456 Learning Street, London, UK EC1A 1BB",
+      "phone": "+44 20 7123 4567",
+      "email": "europe@auroralearning.com",
+      "coordinates": {
+        "lat": 51.5074,
+        "lng": -0.1278
+      }
+    },
+    {
+      "id": 3,
+      "name": "Asia Pacific Office",
+      "address": "789 Education Plaza, Singapore 018989",
+      "phone": "+65 6123 4567",
+      "email": "apac@auroralearning.com",
+      "coordinates": {
+        "lat": 1.3521,
+        "lng": 103.8198
+      }
+    }
+  ],
+  "departments": [
+    {
+      "id": 1,
+      "name": "Student Support",
+      "description": "Get help with courses, technical issues, and general inquiries",
+      "email": "support@auroralearning.com",
+      "phone": "+1 (555) 123-4568",
+      "icon": "support",
+      "hours": "24/7 Available"
+    },
+    {
+      "id": 2,
+      "name": "Admissions",
+      "description": "Information about enrollment, course selection, and requirements",
+      "email": "admissions@auroralearning.com",
+      "phone": "+1 (555) 123-4569",
+      "icon": "admissions",
+      "hours": "Mon-Fri 9AM-6PM"
+    },
+    {
+      "id": 3,
+      "name": "Career Services",
+      "description": "Career guidance, job placement assistance, and industry connections",
+      "email": "careers@auroralearning.com",
+      "phone": "+1 (555) 123-4570",
+      "icon": "career",
+      "hours": "Mon-Fri 10AM-5PM"
+    },
+    {
+      "id": 4,
+      "name": "Corporate Training",
+      "description": "Custom training solutions for businesses and organizations",
+      "email": "corporate@auroralearning.com",
+      "phone": "+1 (555) 123-4571",
+      "icon": "corporate",
+      "hours": "Mon-Fri 9AM-6PM"
+    }
+  ],
+  "socialMedia": [
+    {
+      "platform": "Facebook",
+      "url": "https://facebook.com/auroralearning",
+      "icon": "facebook"
+    },
+    {
+      "platform": "Twitter",
+      "url": "https://twitter.com/auroralearning",
+      "icon": "twitter"
+    },
+    {
+      "platform": "LinkedIn",
+      "url": "https://linkedin.com/company/auroralearning",
+      "icon": "linkedin"
+    },
+    {
+      "platform": "Instagram",
+      "url": "https://instagram.com/auroralearning",
+      "icon": "instagram"
+    },
+    {
+      "platform": "YouTube",
+      "url": "https://youtube.com/auroralearning",
+      "icon": "youtube"
+    }
+  ],
+  "faq": [
+    {
+      "id": 1,
+      "question": "How do I enroll in a course?",
+      "answer": "You can enroll in any course by creating an account, browsing our course catalog, and clicking the 'Enroll Now' button on your chosen course."
+    },
+    {
+      "id": 2,
+      "question": "Do you offer refunds?",
+      "answer": "Yes, we offer a 30-day money-back guarantee for all our courses. If you're not satisfied, contact our support team for a full refund."
+    },
+    {
+      "id": 3,
+      "question": "Are the certificates recognized by employers?",
+      "answer": "Our certificates are industry-recognized and valued by employers. Many of our graduates have successfully used them to advance their careers."
+    },
+    {
+      "id": 4,
+      "question": "Can I access courses on mobile devices?",
+      "answer": "Yes, our platform is fully responsive and optimized for mobile devices. You can learn anywhere, anytime."
+    },
+    {
+      "id": 5,
+      "question": "Do you offer corporate training?",
+      "answer": "Yes, we provide custom corporate training solutions. Contact our corporate training team to discuss your organization's needs."
+    }
+  ]
+}
