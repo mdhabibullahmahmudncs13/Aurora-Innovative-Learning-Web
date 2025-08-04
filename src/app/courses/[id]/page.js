@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import CustomVideoPlayer from '@/components/VideoPlayer';
+import VideoControls from '@/components/VideoControls';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCourse } from '@/contexts/CourseContext';
 import { useVideo } from '@/contexts/VideoContext';
@@ -29,9 +30,41 @@ const CoursePage = ({ params }) => {
   const [enrolling, setEnrolling] = useState(false);
   const [progress, setProgress] = useState(0);
   const [userEnrolled, setUserEnrolled] = useState(false);
+  const videoPlayerRef = useRef(null);
+  const [videoControlsState, setVideoControlsState] = useState({
+    isPlaying: false,
+    playbackRate: 1,
+    isFullscreen: false,
+    isMuted: false,
+    volume: 50,
+    isReady: false
+  });
   
   // Check if user can manage lessons (instructor or admin)
   const canManageLessons = userProfile && (userProfile.role === 'instructor' || userProfile.role === 'admin');
+  
+  // Function to update video controls state
+  const updateVideoControlsState = () => {
+    if (videoPlayerRef.current) {
+      setVideoControlsState({
+        isPlaying: videoPlayerRef.current.isPlaying,
+        playbackRate: videoPlayerRef.current.playbackRate,
+        isFullscreen: videoPlayerRef.current.isFullscreen,
+        isMuted: videoPlayerRef.current.isMuted,
+        volume: videoPlayerRef.current.volume,
+        isReady: videoPlayerRef.current.isReady
+      });
+    }
+  };
+  
+  // Sync video player state with controls
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateVideoControlsState();
+    }, 500); // Update every 500ms
+    
+    return () => clearInterval(interval);
+  }, [currentLesson, videoUrl]);
   
   useEffect(() => {
     if (unwrappedParams?.id) {
@@ -116,22 +149,28 @@ const CoursePage = ({ params }) => {
       return;
     }
     
-    setEnrolling(true);
-    try {
-      await enrollInCourse(course.$id);
-      setUserEnrolled(true);
-      toast.success('Successfully enrolled in course!');
-      
-      // Load first lesson after enrollment
-      if (lessons.length > 0) {
-        setCurrentLesson(lessons[0]);
-        await loadVideo(lessons[0]);
+    if (course?.price === 0) {
+      // For free courses, enroll directly
+      setEnrolling(true);
+      try {
+        await enrollInCourse(course.$id);
+        setUserEnrolled(true);
+        toast.success('Successfully enrolled in course!');
+        
+        // Load first lesson after enrollment
+        if (lessons.length > 0) {
+          setCurrentLesson(lessons[0]);
+          await loadVideo(lessons[0]);
+        }
+      } catch (error) {
+        console.error('Enrollment error:', error);
+        toast.error('Failed to enroll in course');
+      } finally {
+        setEnrolling(false);
       }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      toast.error('Failed to enroll in course');
-    } finally {
-      setEnrolling(false);
+    } else {
+      // For paid courses, redirect to checkout
+      router.push(`/courses/checkout?courseId=${course.$id}`);
     }
   };
   
@@ -227,6 +266,7 @@ const CoursePage = ({ params }) => {
                 {currentLesson && videoUrl ? (
                   <div className="aspect-video relative">
                     <CustomVideoPlayer
+                      ref={videoPlayerRef}
                       url={videoUrl}
                       width="100%"
                       height="100%"
@@ -253,6 +293,39 @@ const CoursePage = ({ params }) => {
                       <h3 className="text-xl font-semibold mb-2">{currentLesson ? 'Video Loading...' : 'Select a Lesson'}</h3>
                       <p className="text-gray-300">{currentLesson ? 'Please wait while we prepare your video' : 'Choose a lesson from the sidebar to start learning'}</p>
                     </div>
+                  </div>
+                )}
+                
+                {/* Video Controls - Above Lesson Info */}
+                {currentLesson && videoControlsState.isReady && (
+                  <div className="p-8 pb-0">
+                    <VideoControls
+                      isPlaying={videoControlsState.isPlaying}
+                      playbackRate={videoControlsState.playbackRate}
+                      isFullscreen={videoControlsState.isFullscreen}
+                      isMuted={videoControlsState.isMuted}
+                      volume={videoControlsState.volume}
+                      onTogglePlayPause={() => {
+                        videoPlayerRef.current?.togglePlayPause();
+                        updateVideoControlsState();
+                      }}
+                      onChangePlaybackRate={() => {
+                        videoPlayerRef.current?.changePlaybackRate();
+                        updateVideoControlsState();
+                      }}
+                      onToggleFullscreen={() => {
+                        videoPlayerRef.current?.toggleFullscreen();
+                        updateVideoControlsState();
+                      }}
+                      onToggleMute={() => {
+                        videoPlayerRef.current?.toggleMute();
+                        updateVideoControlsState();
+                      }}
+                      onAdjustVolume={(amount) => {
+                        videoPlayerRef.current?.adjustVolume(amount);
+                        updateVideoControlsState();
+                      }}
+                    />
                   </div>
                 )}
                 

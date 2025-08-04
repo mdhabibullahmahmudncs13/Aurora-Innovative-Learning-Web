@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { useCourse } from '@/contexts/CourseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Filter from "@/components/Filter";
@@ -11,6 +12,7 @@ import Image from 'next/image';
 const COURSES_PER_PAGE = 9; // Courses per page
 
 export default function CoursesPage() {
+  const router = useRouter();
   const { courses, fetchCourses, enrollInCourse, isEnrolled } = useCourse();
   const { isAuthenticated } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -18,11 +20,21 @@ export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, popular, title, price
   const [loading, setLoading] = useState(true);
+  const [enrollmentStatus, setEnrollmentStatus] = useState({});
 
   // Fetch courses on component mount
   useEffect(() => {
     loadCourses();
   }, []);
+
+  // Check enrollment status for all courses when user authentication changes
+  useEffect(() => {
+    if (isAuthenticated && courses.length > 0) {
+      checkEnrollmentStatus();
+    } else {
+      setEnrollmentStatus({});
+    }
+  }, [isAuthenticated, courses]);
 
   const loadCourses = async () => {
     try {
@@ -34,20 +46,46 @@ export default function CoursesPage() {
     }
   };
 
+  const checkEnrollmentStatus = async () => {
+    if (!isAuthenticated || courses.length === 0) return;
+    
+    const statusPromises = courses.map(async (course) => {
+      const enrolled = await isEnrolled(course.$id);
+      return { courseId: course.$id, enrolled };
+    });
+    
+    const results = await Promise.all(statusPromises);
+    const statusMap = {};
+    results.forEach(({ courseId, enrolled }) => {
+      statusMap[courseId] = enrolled;
+    });
+    
+    setEnrollmentStatus(statusMap);
+  };
+
   const handleCardClick = (id) => {
     window.location.href = `/courses/${id}`;
   };
 
   const handleEnrollment = async (courseId) => {
     if (!isAuthenticated) {
-      window.location.href = '/auth/login';
+      router.push('/auth/login');
       return;
     }
     
-    try {
-      await enrollInCourse(courseId);
-    } catch (error) {
-      console.error('Enrollment error:', error);
+    // Find the course to check if it's free
+    const course = courses.find(c => c.$id === courseId);
+    
+    if (course?.price === 0) {
+      // For free courses, enroll directly
+      try {
+        await enrollInCourse(courseId);
+      } catch (error) {
+        console.error('Enrollment error:', error);
+      }
+    } else {
+      // For paid courses, redirect to checkout
+      router.push(`/courses/checkout?courseId=${courseId}`);
     }
   };
 
@@ -258,7 +296,7 @@ export default function CoursesPage() {
 
                       {/* Action Buttons */}
                       <div className="flex space-x-2">
-                        {isAuthenticated && isEnrolled(course.$id) ? (
+                        {isAuthenticated && enrollmentStatus[course.$id] ? (
                           <Link 
                             href={`/courses/${course.$id}`}
                             className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"

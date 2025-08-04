@@ -22,7 +22,7 @@ const PaymentSubmission = ({ course, onPaymentSubmitted }) => {
   const { 
     paymentMethods, 
     loading, 
-    createPaymentRequest, 
+    submitPaymentRequest, 
     fetchPaymentRequests,
     paymentRequests
   } = usePayment();
@@ -75,7 +75,7 @@ const PaymentSubmission = ({ course, onPaymentSubmitted }) => {
 
     setSubmitting(true);
     try {
-      const result = await createPaymentRequest({
+      const result = await submitPaymentRequest({
         courseId: course.$id,
         paymentMethodId: selectedMethod.$id,
         amount: paymentForm.amount,
