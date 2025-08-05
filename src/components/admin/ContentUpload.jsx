@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { storage, databases, BUCKET_IDS, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { ID } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const ContentUpload = ({ courseId, onUploadComplete }) => {
   const [uploading, setUploading] = useState(false);

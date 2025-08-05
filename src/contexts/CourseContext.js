@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from 'react';
 import { databases, functions, DATABASE_IDS, COLLECTION_IDS, FUNCTION_IDS } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
 const CourseContext = createContext({});
@@ -153,7 +153,7 @@ export const CourseProvider = ({ children }) => {
             );
             
             if (existingEnrollment.documents.length > 0) {
-                toast.info('You are already enrolled in this course');
+                toast('You are already enrolled in this course');
                 return { success: false, error: 'Already enrolled' };
             }
             

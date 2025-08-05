@@ -15,7 +15,7 @@ import {
   ArrowRight,
   RefreshCw
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const PaymentSubmission = ({ course, onPaymentSubmitted }) => {
   const { userProfile } = useAuth();

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import CourseContentManager from '@/components/admin/CourseContentManager';
 import AdminStats from '@/components/admin/AdminStats';
 import UserManagement from '@/components/admin/UserManagement';

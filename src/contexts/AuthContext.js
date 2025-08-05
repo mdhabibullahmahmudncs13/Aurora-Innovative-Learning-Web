@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { account, databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext({});
 

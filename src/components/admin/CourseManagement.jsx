@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { databases, storage, DATABASE_IDS, COLLECTION_IDS, BUCKET_IDS } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 function CourseManagement({ courses, onCoursesUpdate, onCourseSelect, userRole, currentUser }) {
   const [filteredCourses, setFilteredCourses] = useState([]);

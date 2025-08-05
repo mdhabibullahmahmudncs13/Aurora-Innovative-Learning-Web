@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { Query, ID } from 'appwrite';
 import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const PaymentContext = createContext();
 

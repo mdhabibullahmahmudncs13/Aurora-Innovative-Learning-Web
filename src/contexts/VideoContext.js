@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { functions, FUNCTION_IDS, databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { validateVideoAccess as validateAccess, logVideoAccess } from '../lib/videoSecurity';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
 const VideoContext = createContext({});

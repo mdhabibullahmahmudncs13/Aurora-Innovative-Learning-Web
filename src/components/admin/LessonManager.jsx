@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useVideo } from '@/contexts/VideoContext';
 
 const LessonManager = ({ courseId, courseTitle, onClose }) => {
