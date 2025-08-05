@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePayment } from '@/contexts/PaymentContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit2, Trash2, Save, X, CreditCard, Smartphone } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const PaymentMethodManager = () => {
   const { userProfile } = useAuth();

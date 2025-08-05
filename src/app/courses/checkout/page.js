@@ -8,7 +8,7 @@ import { useCourse } from '@/contexts/CourseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePayment } from '@/contexts/PaymentContext';
 import PaymentSubmission from '@/components/student/PaymentSubmission';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const CheckoutContent = () => {
   const router = useRouter();

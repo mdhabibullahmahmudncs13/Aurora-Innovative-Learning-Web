@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { storage, databases, BUCKET_IDS, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const ContentManager = ({ courseId }) => {
   const [files, setFiles] = useState([]);

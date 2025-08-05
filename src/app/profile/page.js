@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
   const { user, userProfile, isAuthenticated, updateProfile, changePassword, loading } = useAuth();

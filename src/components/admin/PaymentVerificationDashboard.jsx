@@ -19,7 +19,7 @@ import {
   User,
   BookOpen
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const PaymentVerificationDashboard = () => {
   const { userProfile } = useAuth();

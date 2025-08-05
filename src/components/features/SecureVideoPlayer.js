@@ -161,14 +161,9 @@ const SecureVideoPlayer = ({ videoId, courseId, lessonId }) => {
       <div 
         className="secure-video-overlay"
         onContextMenu={(e) => e.preventDefault()}
+        onSelectStart={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
-        style={{ 
-          zIndex: 1,
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none'
-        }}
+        style={{ zIndex: 1 }}
       />
       {!isPlayerReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">

@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCourse } from '@/contexts/CourseContext';
 import { useVideo } from '@/contexts/VideoContext';
 import CourseContent from '@/components/CourseContent';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 
 

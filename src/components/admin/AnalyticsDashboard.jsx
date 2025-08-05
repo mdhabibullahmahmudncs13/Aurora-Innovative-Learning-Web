@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
