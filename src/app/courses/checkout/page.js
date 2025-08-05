@@ -14,7 +14,7 @@ const CheckoutContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated } = useAuth();
-  const { getCourse, enrollInCourse } = useCourse();
+  const { fetchCourse, enrollInCourse } = useCourse();
   
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,7 @@ const CheckoutContent = () => {
       return;
     }
     
-    const courseId = searchParams.get('course');
+    const courseId = searchParams.get('courseId');
     if (courseId) {
       loadCourse(courseId);
     } else {
@@ -65,7 +65,7 @@ const CheckoutContent = () => {
   
   const loadCourse = async (courseId) => {
     try {
-      const courseData = await getCourse(courseId);
+      const courseData = await fetchCourse(courseId);
       setCourse(courseData.course);
       setLoading(false);
     } catch (error) {

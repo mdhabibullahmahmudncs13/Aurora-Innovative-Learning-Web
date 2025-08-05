@@ -1,0 +1,99 @@
+/* Hide YouTube branding and controls that allow sharing */
+.ytp-button[data-tooltip-target-id="ytp-share-button"],
+.ytp-button[data-tooltip-target-id="ytp-watch-later-button"],
+.ytp-share-button,
+.ytp-watch-later-button,
+.ytp-copylink-button,
+.ytp-cards-button,
+.ytp-endscreen-content {
+  display: none !important;
+}
+
+/* Hide YouTube logo */
+.ytp-youtube-button {
+  display: none !important;
+}
+
+/* Prevent text selection on video container */
+.video-container {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Disable right-click context menu */
+.video-container * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Additional security styling */
+iframe[src*="youtube"] {
+  pointer-events: auto;
+  border: none;
+}
+
+/* Hide additional YouTube UI elements */
+.ytp-chrome-top {
+  display: none !important;
+}
+
+.ytp-show-cards-title {
+  display: none !important;
+}
+
+.ytp-ce-element {
+  display: none !important;
+}
+
+.ytp-cards-teaser {
+  display: none !important;
+}
+
+/* Hide watermark */
+.ytp-watermark {
+  display: none !important;
+}
+
+/* Hide info cards */
+.ytp-cards-button {
+  display: none !important;
+}
+
+/* Hide end screen elements */
+.ytp-endscreen-content {
+  display: none !important;
+}
+
+/* Security overlay styles */
+.secure-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Prevent video download attempts */
+.secure-video-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.secure-video-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}

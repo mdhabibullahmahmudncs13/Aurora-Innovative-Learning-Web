@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import CustomVideoPlayer from '@/components/VideoPlayer';
+import SecureVideoPlayer from '@/components/features/SecureVideoPlayer';
+import '@/styles/video-security.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCourse } from '@/contexts/CourseContext';
 import { useVideo } from '@/contexts/VideoContext';
@@ -116,22 +117,28 @@ const CoursePage = ({ params }) => {
       return;
     }
     
-    setEnrolling(true);
-    try {
-      await enrollInCourse(course.$id);
-      setUserEnrolled(true);
-      toast.success('Successfully enrolled in course!');
-      
-      // Load first lesson after enrollment
-      if (lessons.length > 0) {
-        setCurrentLesson(lessons[0]);
-        await loadVideo(lessons[0]);
+    if (course?.price === 0) {
+      // For free courses, enroll directly
+      setEnrolling(true);
+      try {
+        await enrollInCourse(course.$id);
+        setUserEnrolled(true);
+        toast.success('Successfully enrolled in course!');
+        
+        // Load first lesson after enrollment
+        if (lessons.length > 0) {
+          setCurrentLesson(lessons[0]);
+          await loadVideo(lessons[0]);
+        }
+      } catch (error) {
+        console.error('Enrollment error:', error);
+        toast.error('Failed to enroll in course');
+      } finally {
+        setEnrolling(false);
       }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      toast.error('Failed to enroll in course');
-    } finally {
-      setEnrolling(false);
+    } else {
+      // For paid courses, redirect to checkout
+      router.push(`/courses/checkout?courseId=${course.$id}`);
     }
   };
   
@@ -149,6 +156,14 @@ const CoursePage = ({ params }) => {
     await loadVideo(lesson);
   };
   
+  // Extract YouTube video ID from URL
+  const extractYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
   const handleVideoProgress = async (progress) => {
     if (!currentLesson || !userEnrolled) return;
     
@@ -225,20 +240,11 @@ const CoursePage = ({ params }) => {
             <div className="lg:col-span-3">
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 {currentLesson && videoUrl ? (
-                  <div className="aspect-video relative">
-                    <CustomVideoPlayer
-                      url={videoUrl}
-                      width="100%"
-                      height="100%"
-                      onProgress={handleVideoProgress}
-                      onError={(error) => {
-                        console.error('CustomVideoPlayer error for URL:', videoUrl, 'Error:', error);
-                        toast.error('Failed to load video player');
-                        setVideoUrl(''); // Clear problematic URL
-                      }}
-                      onReady={() => {
-                        console.log('CustomVideoPlayer ready with URL:', videoUrl);
-                      }}
+                  <div className="aspect-video relative secure-video-container">
+                    <SecureVideoPlayer
+                      videoId={extractYouTubeVideoId(videoUrl)}
+                      courseId={unwrappedParams.id}
+                      lessonId={currentLesson.$id}
                     />
                   </div>
                 ) : (

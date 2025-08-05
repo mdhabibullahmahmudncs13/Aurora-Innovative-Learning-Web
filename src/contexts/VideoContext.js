@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { functions, FUNCTION_IDS, databases, DATABASE_IDS, COLLECTION_IDS } from '@/lib/appwrite';
+import { validateVideoAccess as validateAccess, logVideoAccess } from '../lib/videoSecurity';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
@@ -15,10 +16,21 @@ export const useVideo = () => {
     return context;
 };
 
+export const useVideoContext = () => {
+    const context = useContext(VideoContext);
+    if (!context) {
+        throw new Error('useVideoContext must be used within VideoProvider');
+    }
+    return context;
+};
+
 export const VideoProvider = ({ children }) => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [activeTokens, setActiveTokens] = useState(new Map());
+    const [currentVideo, setCurrentVideo] = useState(null);
+    const [watchTime, setWatchTime] = useState({});
+    const [videoAccess, setVideoAccess] = useState({});
 
     // Request secure video access token
     const requestVideoAccess = async (lessonId, courseId) => {
@@ -128,25 +140,59 @@ export const VideoProvider = ({ children }) => {
         }
     };
 
-    // Validate video access permissions
+    // Enhanced video access validation with security
+    const checkVideoAccess = async (courseId, lessonId) => {
+        if (!user) return false;
+        
+        const accessKey = `${courseId}-${lessonId}`;
+        if (videoAccess[accessKey] !== undefined) {
+            return videoAccess[accessKey];
+        }
+
+        const hasAccess = await validateAccess(user.$id, courseId, lessonId);
+        setVideoAccess(prev => ({ ...prev, [accessKey]: hasAccess }));
+        
+        return hasAccess;
+    };
+
+    // Legacy validation method for backward compatibility
     const validateVideoAccess = async (lessonId, courseId) => {
         try {
             if (!user) return { success: false, error: 'User not authenticated' };
 
-            // Temporary local fallback for video access validation (server functions pending deployment)
-            console.log('Video access validation for:', { userId: user.$id, lessonId, courseId });
+            const hasAccess = await checkVideoAccess(courseId, lessonId);
             
-            // Simulate access validation
-            const result = {
-                success: true,
-                hasAccess: true,
-                message: 'Access validated (local fallback)'
+            return {
+                success: hasAccess,
+                hasAccess: hasAccess,
+                message: hasAccess ? 'Access granted' : 'Access denied'
             };
-            return result;
         } catch (error) {
             console.error('Error validating video access:', error);
             return { success: false, error: error.message };
         }
+    };
+
+    // Update watch time with security logging
+    const updateWatchTime = async (courseId, lessonId, time) => {
+        const key = `${courseId}-${lessonId}`;
+        setWatchTime(prev => ({ ...prev, [key]: time }));
+        
+        // Log video progress
+        await logVideoAccess(user?.$id, courseId, lessonId, 'progress');
+    };
+
+    // Play video with access control
+    const playVideo = async (videoData) => {
+        const { courseId, lessonId } = videoData;
+        const hasAccess = await checkVideoAccess(courseId, lessonId);
+        
+        if (!hasAccess) {
+            throw new Error('Access denied to this video');
+        }
+
+        setCurrentVideo(videoData);
+        await logVideoAccess(user?.$id, courseId, lessonId, 'play');
     };
 
     // Revoke active video access tokens
@@ -315,10 +361,15 @@ export const VideoProvider = ({ children }) => {
     const value = {
         loading,
         activeTokens: Array.from(activeTokens.entries()),
+        currentVideo,
+        watchTime,
         requestVideoAccess,
         getVideoAccess,
         updateVideoProgress,
         validateVideoAccess,
+        checkVideoAccess,
+        updateWatchTime,
+        playVideo,
         revokeVideoAccess,
         validateYouTubeVideo,
         configureVideoRestrictions,

@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, Functions, Teams } from 'appwrite';
+import { Client, Account, Databases, Storage, Functions, Teams, Query, ID } from 'appwrite';
 
 const client = new Client();
 
@@ -26,6 +26,7 @@ export const COLLECTION_IDS = {
     LESSONS: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_LESSONS_ID || 'lessons',
     ENROLLMENTS: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ENROLLMENTS_ID || 'enrollments',
     VIDEO_ACCESS_TOKENS: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_TOKENS_ID || 'video_access_tokens',
+    VIDEO_ACCESS_LOGS: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_LOGS_ID || 'video_access_logs',
     USER_ACTIVITY: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_USER_ACTIVITY_ID || 'user_activity',
     COURSE_ANALYTICS: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_COURSE_ANALYTICS_ID || 'course_analytics',
     FILE_METADATA: process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_FILE_METADATA_ID || 'file_metadata',
@@ -52,5 +53,5 @@ export const FUNCTION_IDS = {
     SECURE_VIDEO_EMBED: process.env.NEXT_PUBLIC_APPWRITE_FUNCTION_SECURE_EMBED_ID || 'secure-video-embed'
 };
 
-export { client };
+export { client, Query, ID };
 export default client;
